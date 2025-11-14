@@ -93,7 +93,7 @@ This project uses the **GitHub Flow** branching strategy.
 3.  **Develop:** Work on isolated tasks (e.g., creating a new form, styling a card). **Do not modify files in `src/context` or `src/services` unless explicitly authorized.**
 4.  **Commit:** Use clear, English commit messages.
 5.  **Push:** Push your feature branch.
-6.  **Pull Request (PR):** Open a PR to merge into the `main` branch. The PR will be reviewed and approved by the Lead before merging.
+6.  **Pull Request (PR):** Open a PR to merge into the `develop` branch. The PR will be reviewed and approved by the Lead before merging.
 
 ### Naming Convention:
 
