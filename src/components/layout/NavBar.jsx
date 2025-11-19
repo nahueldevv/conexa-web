@@ -120,9 +120,19 @@ function Navbar() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={handleToggleDropdown}
-                    className="flex size-10 items-center justify-center rounded-full bg-amber-500 text-xl font-bold text-black ring-2 ring-transparent ring-offset-2 ring-offset-white transition-all focus:outline-none focus:ring-amber-600 dark:ring-offset-neutral-950"
+                    className="flex size-10 items-center justify-center rounded-full overflow-hidden ring-2 ring-transparent ring-offset-2 ring-offset-white transition-all focus:outline-none focus:ring-amber-600 dark:ring-offset-neutral-950"
                   >
-                    {userInitial.toUpperCase()}
+                    {user?.profileImageUrl ? (
+                      <img
+                        src={user.profileImageUrl}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex w-full h-full items-center justify-center bg-amber-500 text-xl font-bold text-black">
+                        {userInitial.toUpperCase()}
+                      </div>
+                    )}
                   </button>
 
                   {isDropdownOpen && (

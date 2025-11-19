@@ -81,8 +81,18 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     try {
       const { data } = await updateProfileService(profileData)
-      setUser(data)
-      return data
+
+      // The API returns now { message, profile }
+      const { message, profile } = data
+
+      // The user's global status is updated.
+      setUser(profile)
+
+      // The actual data that is expected is returned, avoiding null values.
+      return {
+        message,
+        profile
+      }
     } catch (error) {
       console.error("Error updating profile:", error.response?.data)
       throw error
