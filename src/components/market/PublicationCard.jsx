@@ -31,14 +31,9 @@
             <p><span className="font-medium">Peso:</span> {item.weight_kg} kg</p>
             <p><span className="font-medium">Volumen:</span> {item.volume_m3} m³</p>
 
-            <p>
-            <span className="font-medium">Vehiculo:</span> 
-            {isOffer ? item.vehicle_type : item.required_vehicle_type}
-            </p>
+            <p><span className="font-medium">Vehiculo:</span> {isOffer ? item.vehicle_type : item.required_vehicle_type}</p>
 
-            <p>
-            <span className="font-medium">Estado:</span> {item.status}
-            </p>
+            <p><span className="font-medium">Estado:</span> {item.status}</p>
         </div>
 
         {/* Expandable section */}
@@ -60,7 +55,7 @@
                 <>
                 <p><span className="font-medium">Temperatura Requerida:</span> {item.required_temperature}</p>
                 <p><span className="font-medium">Vehiculos Necesarios:</span> {item.number_of_vehicles}</p>
-                <p><span className="font-medium">Fecha de entrega:</span> {item.ready_date}</p>
+                <p><span className="font-medium">Fecha de carga:</span> {item.ready_date}</p>
                 <p><span className="font-medium">Fecha límite de entrega:</span> {item.delivery_deadline}</p>
                 <p><span className="font-medium">Presupuesto:</span> {item.budget}</p>
                 </>
