@@ -15,10 +15,8 @@ import ProtectedRoute from "./components/auth/ProtectedRoute.jsx"
 
 import DashboardPage from "./pages/market/DashboardPage.jsx"
 import ProfilePage from "./pages/ProfilePage.jsx"
-import ProfileEditPage from "./pages/ProfileEditPage.jsx"
-import CreateOfferPage from "./pages/market/CreateOfferPage.jsx"
-import CreateRequestPage from "./pages/market/CreateRequestPage.jsx"
 import MyPublicationsPage from "./pages/market/MyPublicationsPage.jsx"
+import CreatePublicationPage from "./pages/market/CreatePublicationPage.jsx"
 
 const router = createBrowserRouter([
   {
@@ -35,9 +33,7 @@ const router = createBrowserRouter([
         children: [
           { path: "/mercado", element: <DashboardPage /> },
           { path: "/profile", element: <ProfilePage /> },
-          { path: "/profile/edit", element: <ProfileEditPage /> },
-          { path: "/mercado/create-offer", element: <CreateOfferPage /> },
-          { path: "/mercado/create-request", element: <CreateRequestPage /> },
+          { path: "/mercado/create", element: <CreatePublicationPage /> },
           { path: "/mercado/my-publications", element: <MyPublicationsPage /> }
         ]
       }

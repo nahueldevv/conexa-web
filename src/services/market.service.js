@@ -5,7 +5,7 @@ import apiClient from "./apiClient"
  * @returns {Promise<Array>} An array of offer objects
  */
 export const getOffers = async () => {
-  return apiClient.get("/mercado/offers")
+  return apiClient.get("/offers")
 }
 
 /**
@@ -14,7 +14,7 @@ export const getOffers = async () => {
  * @returns {Promise<Object>} The newly created offer
  */
 export const createOffer = async (offerData) => {
-  return apiClient.post("/mercado/offers", offerData)
+  return apiClient.post("/offers", offerData)
 }
 
 /**
@@ -22,7 +22,7 @@ export const createOffer = async (offerData) => {
  * @returns {Promise<Array>} An array of request objects
  */
 export const getRequests = async () => {
-  return apiClient.get("/mercado/requests")
+  return apiClient.get("/requests")
 }
 
 /**
@@ -31,7 +31,24 @@ export const getRequests = async () => {
  * @returns {Promise<Object>} The newly created request
  */
 export const createRequest = async (requestData) => {
-  return apiClient.post("/mercado/requests", requestData)
+  return apiClient.post("/requests", requestData)
+}
+
+/**
+ * Obtiene un listing individual por ID (Offer o Request).
+ */
+export const getListingById = async (type, id) => {
+  const endpoint = type === 'offer' ? `/offers/${id}` : `/requests/${id}`
+  const response = await apiClient.get(endpoint)
+  return response.data
+}
+
+/**
+ * Actualiza el contenido (destino, peso, etc.) de un listing.
+ */
+export const updateListingContent = async (type, id, data) => {
+  const endpoint = type === 'offer' ? `/offers/${id}` : `/requests/${id}`
+  return apiClient.patch(endpoint, data)
 }
 
 /**
@@ -55,4 +72,53 @@ export const getMyOffers = async () => {
 export const getMyRequests = async () => {
   const response = await apiClient.get("/requests/mine")
   return response.data
+}
+
+/**
+ * Obtiene el catálogo maestro de documentos requeridos.
+ * Endpoint: GET /api/documents
+ */
+export const getDocumentTypes = async () => {
+  const response = await apiClient.get("/documents")
+  return response.data
+}
+
+/**
+ * Actualiza la lista de documentos requeridos para una Oferta existente.
+ * Endpoint: PUT /api/offers/:id/documents
+ * @param {string} id - UUID de la oferta
+ * @param {Array<string>} documentIds - Array de UUIDs de documentos
+ */
+export const updateOfferDocuments = async (id, documentIds) => {
+  const payload = { requiredDocuments: documentIds }
+  return apiClient.put(`/offers/${id}/documents`, payload)
+}
+
+/**
+ * Actualiza la lista de documentos requeridos para un Pedido existente.
+ * Endpoint: PUT /api/requests/:id/documents
+ * @param {string} id - UUID del pedido
+ * @param {Array<string>} documentIds - Array de UUIDs de documentos
+ */
+export const updateRequestDocuments = async (id, documentIds) => {
+  const payload = { requiredDocuments: documentIds }
+  return apiClient.put(`/requests/${id}/documents`, payload)
+}
+
+/**
+ * Elimina permanentemente una oferta de transporte.
+ * Endpoint: DELETE /api/offers/:id
+ * @param {string} id - UUID de la oferta
+ */
+export const deleteOffer = async (id) => {
+  return apiClient.delete(`/offers/${id}`)
+}
+
+/**
+ * Elimina permanentemente un pedido de carga.
+ * Endpoint: DELETE /api/requests/:id
+ * @param {string} id - UUID del pedido
+ */
+export const deleteRequest = async (id) => {
+  return apiClient.delete(`/requests/${id}`)
 }
