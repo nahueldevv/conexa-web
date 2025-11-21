@@ -12,9 +12,9 @@ import CommunityPage from "./pages/community/CommunityPage.jsx"
 import AboutPage from "./pages/AboutPage.jsx"
 
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx"
+import ProfilePage from "./pages/ProfilePage.jsx"
 
 import DashboardPage from "./pages/market/DashboardPage.jsx"
-import ProfilePage from "./pages/ProfilePage.jsx"
 import MyPublicationsPage from "./pages/market/MyPublicationsPage.jsx"
 import CreatePublicationPage from "./pages/market/CreatePublicationPage.jsx"
 

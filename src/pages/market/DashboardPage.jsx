@@ -41,7 +41,7 @@ const DashboardPage = () => {
   `;
 
   return (
-    <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-40 flex flex-1 justify-center py-5">
+    <div className="animate-fadeIn px-4 sm:px-8 md:px-16 lg:px-24 xl:px-40 flex flex-1 justify-center py-5">
       <div className="layout-content-container flex flex-col max-w-[1200px] flex-1">
         {/* HEADINGS */}
         <div className="flex flex-wrap justify-between gap-4 items-center mb-6 px-4 md:px-0">
