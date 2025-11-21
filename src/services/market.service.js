@@ -5,7 +5,7 @@ import apiClient from "./apiClient"
  * @returns {Promise<Array>} An array of offer objects
  */
 export const getOffers = async () => {
-  return apiClient.get("/mercado/offers")
+  return apiClient.get("/offers")
 }
 
 /**
@@ -14,7 +14,7 @@ export const getOffers = async () => {
  * @returns {Promise<Object>} The newly created offer
  */
 export const createOffer = async (offerData) => {
-  return apiClient.post("/mercado/offers", offerData)
+  return apiClient.post("/offers", offerData)
 }
 
 /**
@@ -22,7 +22,7 @@ export const createOffer = async (offerData) => {
  * @returns {Promise<Array>} An array of request objects
  */
 export const getRequests = async () => {
-  return apiClient.get("/mercado/requests")
+  return apiClient.get("/requests")
 }
 
 /**
@@ -31,5 +31,28 @@ export const getRequests = async () => {
  * @returns {Promise<Object>} The newly created request
  */
 export const createRequest = async (requestData) => {
-  return apiClient.post("/mercado/requests", requestData)
+  return apiClient.post("/requests", requestData)
+}
+
+/**
+ * Obtiene las publicaciones propias (Ofertas o Solicitudes)
+ * El BE maneja la lógica de rol internamente:
+ * - Transportista: Retorna solo Offers.
+ * - Empresa: Retorna solo Requests.
+ * - Operador Dual: Retorna ambos.
+ */
+export const getMyPublications = async () => {
+  // Asumimos que la API retorna un array o un objeto { offers: [], requests: [] }
+  const response = await apiClient.get("/publications/mine")
+  return response.data
+}
+
+export const getMyOffers = async () => {
+  const response = await apiClient.get("/offers/mine")
+  return response.data
+}
+
+export const getMyRequests = async () => {
+  const response = await apiClient.get("/requests/mine")
+  return response.data
 }
