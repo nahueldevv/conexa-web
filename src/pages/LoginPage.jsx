@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { useAuth } from "../context/AuthContext"
@@ -20,7 +20,23 @@ const LogoIcon = () => (
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loginError, setLoginError] = useState(null)
+  const [accountDeletedMsg, setAccountDeletedMsg] = useState(null)
+  
+  useEffect(() => {
+    let timer
 
+    if (localStorage.getItem("accountDeleted") === "true") {
+      setAccountDeletedMsg("Tu cuenta ha sido eliminada exitosamente.")
+
+      timer = setTimeout(() => {
+        setAccountDeletedMsg(null)
+        localStorage.removeItem("accountDeleted")
+      }, 3000)
+    }
+
+    return () => clearTimeout(timer)
+  }, [])
+  
   const {
     register,
     handleSubmit,
@@ -48,6 +64,11 @@ function LoginPage() {
 
   return (
     <div className="animate-fadeIn flex min-h-[calc(100vh-64px)] w-full flex-col items-center justify-center p-4">
+      {accountDeletedMsg && (
+        <div className="p-4 bg-green-100 text-green-800 rounded-lg text-sm mb-6">
+          {accountDeletedMsg}
+        </div>
+      )}
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <LogoIcon />
