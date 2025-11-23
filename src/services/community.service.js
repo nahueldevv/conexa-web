@@ -8,7 +8,8 @@ import apiClient from "./apiClient"
  */
 export const getForums = async () => {
   const response = await apiClient.get("/community/forums")
-  return response.data
+  const topics = response.data.topics
+  return topics
 }
 
 /**
@@ -18,7 +19,8 @@ export const getForums = async () => {
  */
 export const getPosts = async (filters = {}) => {
   const response = await apiClient.get("/community/posts", { params: filters })
-  return response.data
+  const posts = response.data.posts
+  return posts
 }
 
 /**
