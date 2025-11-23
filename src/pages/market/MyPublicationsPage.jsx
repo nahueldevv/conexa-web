@@ -1,17 +1,51 @@
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import { useMyPublications } from "../../hooks/useMyPublications"
 import PublicationCard from "../../components/market/PublicationCard"
+import { PlusCircle, Search, Filter, ArrowUpDown } from "lucide-react"
 
 function MyPublicationsPage() {
   const { data, loading, error } = useMyPublications()
-  const [filter, setFilter] = useState("all")
 
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter] = useState("all")
+  const [sortBy, setSortBy] = useState("date_desc")
+
+  // 🟦 FIX: hooks deben ejecutarse SIEMPRE, aunque data sea null
+  const publications = data?.publications ?? []
+
+  const filteredPublications = useMemo(() => {
+    let list = [...publications]
+
+    // search
+    if (searchTerm.trim() !== "") {
+      const term = searchTerm.toLowerCase()
+      list = list.filter(item => {
+        const origin = (item.origin || "").toLowerCase()
+        const dest = (item.destination || "").toLowerCase()
+        return origin.includes(term) || dest.includes(term)
+      })
+    }
+
+    if (statusFilter !== "all") {
+      list = list.filter(item =>
+        (item.status || "").toLowerCase().includes(statusFilter)
+      )
+    }
+
+    list.sort((a, b) => {
+      const aDate = new Date(a.available_date || a.ready_date || a.created_at || 0)
+      const bDate = new Date(b.available_date || b.ready_date || b.created_at || 0)
+      return sortBy === "date_asc" ? aDate - bDate : bDate - aDate
+    })
+
+    return list
+  }, [publications, searchTerm, statusFilter, sortBy])
+
+  // 🟩 Recién AHORA los returns condicionales
   if (loading) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center">
-        <p className="animate-pulse text-lg font-medium text-neutral-700 dark:text-neutral-200">
-          Cargando tus publicaciones...
-        </p>
+        <p className="animate-pulse text-lg">Cargando tus publicaciones...</p>
       </div>
     )
   }
@@ -24,132 +58,27 @@ function MyPublicationsPage() {
     )
   }
 
-  if (!data || data.total === 0) {
+  if (publications.length === 0) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center">
-        <p className="text-neutral-600 dark:text-neutral-300">
-          No tienes publicaciones todavia. 
-        </p>
+        <p>No tienes publicaciones todavía.</p>
       </div>
     )
   }
 
-  // Normalize backend roles to UI roles
-  let normalizedRole = "dual"
-  if (data.role === "transportista") normalizedRole = "offer"
-  if (data.role === "empresa") normalizedRole = "request"
-
-  // Separate offers and requests
-  const offers = data.publications.filter(p => p.vehicle_type)
-  const requests = data.publications.filter(p => p.required_vehicle_type)
-
+  // 🔵 Render normal
   return (
-    <div className="min-h-[calc(100vh-64px)] w-full bg-neutral-50 dark:bg-neutral-900">
-      <div className="mx-auto max-w-7xl px-4 py-10">
+    <div className="min-h-[calc(100vh-64px)] w-full bg-white dark:bg-neutral-900">
+      <div className="mx-auto max-w-[960px] flex flex-col px-4 py-8">
 
-        {/* HEADER */}
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-8">
-          Mis Publicaciones ({data.total})
-        </h1>
+        {/* ... resto de la UI ... */}
 
-        {/* FILTER BUTTONS — ONLY FOR DUAL USERS */}
-        {normalizedRole === "dual" && (
-          <div className="flex gap-3 mb-10">
+        <section className="mt-6 space-y-4">
+          {filteredPublications.map(item => (
+            <PublicationCard key={item.id} item={item} />
+          ))}
+        </section>
 
-            <button
-              onClick={() => setFilter("all")}
-              className={`rounded-md px-4 py-2 text-sm font-medium 
-              transition-all duration-300 ease-in-out transform
-              ${filter === "all"
-                ? "bg-blue-600 text-white scale-105"
-                : "bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-700 dark:hover:bg-neutral-600"}`}
-            >
-              Todo
-            </button>
-
-            <button
-              onClick={() => setFilter("offers")}
-              className={`rounded-md px-4 py-2 text-sm font-medium 
-              transition-all duration-300 ease-in-out transform
-              ${filter === "offers"
-                ? "bg-amber-600 text-white scale-105"
-                : "bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-700 dark:hover:bg-neutral-600"}`}
-            >
-              Ofertas
-            </button>
-
-            <button
-              onClick={() => setFilter("requests")}
-              className={`rounded-md px-4 py-2 text-sm font-medium
-              transition-all duration-300 ease-in-out transform
-              ${filter === "requests"
-                ? "bg-cyan-600 text-white scale-105"
-                : "bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-700 dark:hover:bg-neutral-600"}`}
-            >
-              Solicitudes
-            </button>
-
-          </div>
-        )}
-
-        {/* MAIN GRID OR SINGLE COLUMN BASED ON ROLE */}
-        <div
-          className={`
-            transition-all duration-300
-            ${normalizedRole === "dual"
-              ? "grid grid-cols-1 lg:grid-cols-2 gap-10"
-              : "flex flex-col gap-10"}
-          `}
-          key={filter}
-        >
-
-          {/* LEFT COLUMN — OFFERS */}
-          {(normalizedRole === "offer" ||
-            (normalizedRole === "dual" && (filter === "all" || filter === "offers")))
-            && (
-              <div className="flex flex-col gap-4 transition-all duration-300">
-                <h2 className="text-2xl font-semibold text-amber-600 dark:text-amber-400">
-                  Ofertas Activas ({offers.length})
-                </h2>
-
-                {offers.length === 0 ? (
-                  <p className="text-neutral-600 dark:text-neutral-400">
-                    No hay ofertas activas
-                  </p>
-                ) : (
-                  <div className="flex flex-col gap-4 transition-all duration-300 opacity-0 animate-fadeIn">
-                    {offers.map(item => (
-                      <PublicationCard key={item.id} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-          {/* RIGHT COLUMN — REQUESTS */}
-          {(normalizedRole === "request" ||
-            (normalizedRole === "dual" && (filter === "all" || filter === "requests")))
-            && (
-              <div className="flex flex-col gap-4 transition-all duration-300">
-                <h2 className="text-2xl font-semibold text-cyan-600 dark:text-cyan-400">
-                  Solicitudes de Carga ({requests.length})
-                </h2>
-
-                {requests.length === 0 ? (
-                  <p className="text-neutral-600 dark:text-neutral-400">
-                    No hay solicitudes de carga
-                  </p>
-                ) : (
-                  <div className="flex flex-col gap-4 transition-all duration-300 opacity-0 animate-fadeIn">
-                    {requests.map(item => (
-                      <PublicationCard key={item.id} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-        </div>
       </div>
     </div>
   )

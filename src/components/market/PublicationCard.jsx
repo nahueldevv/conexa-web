@@ -1,162 +1,90 @@
-import React, { useState } from "react";
-import { Truck, Package } from "lucide-react";
+import React from "react"
+import { Truck, Package, Edit3, Trash2 } from "lucide-react"
 
 const PublicationCard = ({ item }) => {
-  const [expanded, setExpanded] = useState(false);
+  const isOffer = !!item.vehicle_type
 
-  const isOffer = !!item.vehicle_type;
-  const isRequest = !isOffer;
+  const origin = item.origin || "Origen no especificado"
+  const destination = item.destination || "Destino no especificado"
 
-  const headerClasses = isRequest
-    ? "bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-400 border-teal-300 dark:border-teal-800"
-    : "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800";
-
-  const baseClasses = `
-    flex flex-col gap-3 p-4 
-    bg-[#F9FAFB] dark:bg-neutral-900 
-    rounded-xl border dark:border-neutral-800 
-    hover:border-amber-500/50 dark:hover:border-amber-500/50 
-    transition-all group shadow-sm
-  `;
-
-  const dateRaw = item.available_date || item.ready_date;
+  const dateRaw = item.available_date || item.ready_date || item.created_at
   const dateFormatted = dateRaw
-    ? new Date(dateRaw).toLocaleDateString()
-    : "A confirmar";
+    ? new Date(dateRaw).toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      })
+    : "Fecha a confirmar"
 
-  const cargoInfo = item.cargo_type
-    ? `${item.cargo_type.toUpperCase()} • ${item.weight_kg}kg`
-    : "Carga general";
+  const cargoType = item.cargo_type || "Carga general"
 
-  const vehicleInfo = isOffer ? item.vehicle_type : item.required_vehicle_type;
+  const rawStatus = (item.status || "").toLowerCase()
+  let statusLabel = item.status || "Sin estado"
+  let statusClasses =
+    "inline-flex items-center rounded-full bg-gray-200 px-3 py-1 text-xs font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+
+  if (rawStatus.includes("act")) {
+    statusClasses =
+      "inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900 dark:text-green-200"
+  } else if (rawStatus.includes("tran")) {
+    statusClasses =
+      "inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+  } else if (rawStatus.includes("fin") || rawStatus.includes("complet")) {
+    statusClasses =
+      "inline-flex items-center rounded-full bg-gray-200 px-3 py-1 text-xs font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+  }
 
   return (
-    <div className={baseClasses}>
-      {/* 🔹 HEADER VISUAL TIPO MARKETCARD */}
-      <div
-        className={`w-full aspect-2/1 relative ${headerClasses} border flex flex-col items-center justify-center rounded-lg p-4 mb-2`}
-      >
-        {isOffer ? (
-          <Truck size={32} className="mb-2 opacity-80" />
-        ) : (
-          <Package size={32} className="mb-2 opacity-80" />
-        )}
-
-        <span className="text-xl font-black uppercase tracking-widest opacity-90">
-          {isOffer ? "OFERTA" : "SOLICITUD"}
-        </span>
-
-        <span className="text-xs font-medium opacity-70 mt-1 uppercase tracking-wider">
-          {isOffer ? "Transporte Disponible" : "Carga Disponible"}
-        </span>
-      </div>
-
-      {/* 🔹 INFORMACIÓN PRINCIPAL */}
-      <div className="flex flex-col">
-        <span className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
-          Ruta
-        </span>
-
-        <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 leading-tight">
-          {item.origin} → {item.destination}
-        </h3>
-
-        <p className="text-sm text-neutral-600 dark:text-neutral-300 mt-1">
-          {cargoInfo}
-        </p>
-      </div>
-
-      {/* 🔹 CUADRÍCULA DE INFO RÁPIDA */}
-      <div className="grid grid-cols-2 gap-2 text-sm text-neutral-700 dark:text-neutral-200">
-        <p>
-          <span className="font-medium">Fecha:</span> {dateFormatted}
-        </p>
-        <p>
-          <span className="font-medium">Vehículo:</span>{" "}
-          {vehicleInfo || "N/A"}
-        </p>
-        <p>
-          <span className="font-medium">Peso:</span> {item.weight_kg} kg
-        </p>
-        <p>
-          <span className="font-medium">Volumen:</span> {item.volume_m3} m³
-        </p>
-      </div>
-
-      {/* 🔹 SECCIÓN EXPANDIBLE */}
-      {expanded && (
-        <div className="mt-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 p-3 text-sm text-neutral-700 dark:text-neutral-200 flex flex-col gap-1 transition-all duration-300 opacity-0 animate-fadeIn">
-          <p>
-            <span className="font-medium">Creada el:</span> {item.created_at}
-          </p>
-          <p>
-            <span className="font-medium">Tipo de carga:</span>{" "}
-            {item.cargo_type}
-          </p>
-
+    <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-[#F9FAFB] p-4 dark:border-gray-700 dark:bg-gray-800/50 sm:flex-row sm:justify-between">
+      {/* LEFT SIDE: ICON + INFO */}
+      <div className="flex items-start gap-4">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-[#005A9C]/10 text-[#005A9C] dark:bg-[#005A9C]/20">
           {isOffer ? (
-            <>
-              <p>
-                <span className="font-medium">Control de Temperatura:</span>{" "}
-                {item.temperature_control}
-              </p>
-              <p>
-                <span className="font-medium">Vehículos disponibles:</span>{" "}
-                {item.number_of_vehicles}
-              </p>
-              <p>
-                <span className="font-medium">Fecha de disponibilidad:</span>{" "}
-                {item.available_date}
-              </p>
-            </>
+            <Truck className="h-6 w-6" />
           ) : (
-            <>
-              <p>
-                <span className="font-medium">Temperatura requerida:</span>{" "}
-                {item.required_temperature}
-              </p>
-              <p>
-                <span className="font-medium">Vehículos necesarios:</span>{" "}
-                {item.number_of_vehicles}
-              </p>
-              <p>
-                <span className="font-medium">Fecha de carga:</span>{" "}
-                {item.ready_date}
-              </p>
-              <p>
-                <span className="font-medium">Fecha límite:</span>{" "}
-                {item.delivery_deadline}
-              </p>
-              <p>
-                <span className="font-medium">Presupuesto:</span>{" "}
-                {item.budget}
-              </p>
-            </>
+            <Package className="h-6 w-6" />
           )}
         </div>
-      )}
 
-      {/* 🔹 FOOTER */}
-      <div className="flex items-center justify-between mt-2">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="rounded-md bg-neutral-200 px-3 py-1 text-sm hover:bg-neutral-300 dark:bg-neutral-700 dark:hover:bg-neutral-600 transition"
-        >
-          {expanded ? "Mostrar menos" : "Mostrar más"}
-        </button>
+        <div className="flex flex-1 flex-col justify-center">
+          <p className="text-base font-bold leading-normal text-[#111827] dark:text-gray-100">
+            {origin} → {destination}
+          </p>
+          <p className="mt-1 text-sm font-normal leading-normal text-gray-600 dark:text-gray-400">
+            Fecha: {dateFormatted}
+          </p>
+          <p className="text-sm font-normal leading-normal text-gray-600 dark:text-gray-400">
+            Tipo de Carga: {cargoType}
+          </p>
+        </div>
+      </div>
 
-        <div className="flex gap-2">
-          <button className="rounded-md bg-neutral-300 px-3 py-1 text-sm hover:bg-neutral-400 dark:bg-neutral-600 dark:hover:bg-neutral-500 transition">
-            Editar
+      {/* RIGHT SIDE: STATUS + ACTIONS */}
+      <div className="ml-16 flex flex-col justify-between gap-2 sm:ml-0 sm:items-end">
+        <div className="shrink-0">
+          <span className={statusClasses}>{statusLabel}</span>
+        </div>
+
+        <div className="mt-1 flex items-center gap-3">
+          <button
+            type="button"
+            className="flex items-center gap-1.5 text-sm font-medium text-[#005A9C] transition hover:underline"
+          >
+            <Edit3 className="h-4 w-4" />
+            <span>Editar</span>
           </button>
 
-          <button className="rounded-md bg-red-300 px-3 py-1 text-sm text-red-900 hover:bg-red-400 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition">
-            Borrar
+          <button
+            type="button"
+            className="flex items-center gap-1.5 text-sm font-medium text-red-600 transition hover:underline dark:text-red-500"
+          >
+            <Trash2 className="h-4 w-4" />
+            <span>Eliminar</span>
           </button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PublicationCard;
+export default PublicationCard
