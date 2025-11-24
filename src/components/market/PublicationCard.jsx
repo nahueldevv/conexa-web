@@ -1,85 +1,179 @@
-import React from "react"
-import { Truck, Package, Edit3, Trash2 } from "lucide-react"
+import React, { useState } from "react"
+import { Pencil, Trash2, Truck, Package } from "lucide-react"
 
 const PublicationCard = ({ item }) => {
+  const [expanded, setExpanded] = useState(false)
+
   const isOffer = !!item.vehicle_type
+  const Icon = isOffer ? Truck : Package
 
-  const origin = item.origin || "Origen no especificado"
-  const destination = item.destination || "Destino no especificado"
+  /* 🎨 BADGE DE ROL (OFERTA / DEMANDA) */
+  const badgeText = isOffer ? "OFERTA DE TRANSPORTE" : "SOLICITUD DE CARGA"
+  const badgeColor = isOffer
+    ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20"
+    : "border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20"
 
-  const dateRaw = item.available_date || item.ready_date || item.created_at
-  const dateFormatted = dateRaw
-    ? new Date(dateRaw).toLocaleDateString("es-AR", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-      })
-    : "Fecha a confirmar"
+  /* 🎨 BADGE DE ESTADO */
+  const status = item.status?.toLowerCase() || ""
 
-  const cargoType = item.cargo_type || "Carga general"
-
-  const rawStatus = (item.status || "").toLowerCase()
-  let statusLabel = item.status || "Sin estado"
-  let statusClasses =
-    "inline-flex items-center rounded-full bg-gray-200 px-3 py-1 text-xs font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-200"
-
-  if (rawStatus.includes("act")) {
-    statusClasses =
-      "inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900 dark:text-green-200"
-  } else if (rawStatus.includes("tran")) {
-    statusClasses =
-      "inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-  } else if (rawStatus.includes("fin") || rawStatus.includes("complet")) {
-    statusClasses =
-      "inline-flex items-center rounded-full bg-gray-200 px-3 py-1 text-xs font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+  const stateStyles = {
+    open: "bg-green-200 dark:bg-green-700 text-black dark:text-white",
+    closed: "bg-red-200 dark:bg-red-700 text-black dark:text-white",
+    in_transit: "bg-blue-200 dark:bg-blue-700 text-black dark:text-white",
   }
 
+  const stateClass =
+    stateStyles[status] ||
+    "bg-gray-200 dark:bg-gray-700 text-black dark:text-white"
+
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-[#F9FAFB] p-4 dark:border-gray-700 dark:bg-gray-800/50 sm:flex-row sm:justify-between">
-      {/* LEFT SIDE: ICON + INFO */}
-      <div className="flex items-start gap-4">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-[#005A9C]/10 text-[#005A9C] dark:bg-[#005A9C]/20">
-          {isOffer ? (
-            <Truck className="h-6 w-6" />
-          ) : (
-            <Package className="h-6 w-6" />
-          )}
+    <div
+      className={`
+        relative w-full rounded-xl border p-5 shadow-sm transition-all 
+        hover:shadow-md dark:border-neutral-700 dark:bg-neutral-900 ${badgeColor}
+      `}
+    >
+      {/* BADGE DE ESTADO (arriba derecha) */}
+      <span
+        className={`
+          absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full
+          ${stateClass}
+        `}
+      >
+        {item.status}
+      </span>
+
+      {/* HEADER */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className={`p-2 rounded-lg bg-white dark:bg-neutral-800 shadow-sm`}>
+          <Icon size={22} className={isOffer ? "text-amber-600" : "text-cyan-600"} />
         </div>
 
-        <div className="flex flex-1 flex-col justify-center">
-          <p className="text-base font-bold leading-normal text-[#111827] dark:text-gray-100">
-            {origin} → {destination}
-          </p>
-          <p className="mt-1 text-sm font-normal leading-normal text-gray-600 dark:text-gray-400">
-            Fecha: {dateFormatted}
-          </p>
-          <p className="text-sm font-normal leading-normal text-gray-600 dark:text-gray-400">
-            Tipo de Carga: {cargoType}
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold opacity-80">{badgeText}</span>
+
+          <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
+            {item.origin} → {item.destination}
+          </h3>
+
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            {item.cargo_type}
           </p>
         </div>
       </div>
 
-      {/* RIGHT SIDE: STATUS + ACTIONS */}
-      <div className="ml-16 flex flex-col justify-between gap-2 sm:ml-0 sm:items-end">
-        <div className="shrink-0">
-          <span className={statusClasses}>{statusLabel}</span>
-        </div>
+      {/* INFO PRINCIPAL */}
+      <div className="grid grid-cols-2 gap-2 text-sm text-neutral-700 dark:text-neutral-200">
+        <p>
+          <span className="font-medium">Peso:</span> {item.weight_kg} kg
+        </p>
+        <p>
+          <span className="font-medium">Volumen:</span> {item.volume_m3} m³
+        </p>
+        <p>
+          <span className="font-medium">Vehículo:</span>{" "}
+          {isOffer ? item.vehicle_type : item.required_vehicle_type}
+        </p>
+      </div>
 
-        <div className="mt-1 flex items-center gap-3">
+      {/* SECCIÓN EXPANDIBLE */}
+      {expanded && (
+        <div
+          className="mt-3 rounded-lg bg-neutral-100 dark:bg-neutral-800 
+                     p-3 text-sm text-neutral-700 dark:text-neutral-200 
+                     flex flex-col gap-3 transition-all duration-300 
+                     opacity-0 animate-fadeIn"
+        >
+          {/* INFO GENERAL */}
+          <div className="flex flex-col gap-1">
+            <p>
+              <span className="font-medium">Creada el:</span> {item.created_at}
+            </p>
+
+            <p>
+              <span className="font-medium">Tipo de carga:</span>{" "}
+              {item.cargo_type}
+            </p>
+
+            {isOffer ? (
+              <>
+                <p>
+                  <span className="font-medium">Control de Temperatura:</span>{" "}
+                  {item.temperature_control}
+                </p>
+                <p>
+                  <span className="font-medium">Vehículos Disponibles:</span>{" "}
+                  {item.number_of_vehicles}
+                </p>
+                <p>
+                  <span className="font-medium">Fecha de disponibilidad:</span>{" "}
+                  {item.available_date}
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  <span className="font-medium">Temperatura Requerida:</span>{" "}
+                  {item.required_temperature}
+                </p>
+                <p>
+                  <span className="font-medium">Vehículos Necesarios:</span>{" "}
+                  {item.number_of_vehicles}
+                </p>
+                <p>
+                  <span className="font-medium">Fecha de carga:</span>{" "}
+                  {item.ready_date}
+                </p>
+                <p>
+                  <span className="font-medium">Fecha límite de entrega:</span>{" "}
+                  {item.delivery_deadline}
+                </p>
+                <p>
+                  <span className="font-medium">Presupuesto:</span>{" "}
+                  {item.budget}
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* DOCUMENTACIÓN (sección nueva) */}
+          <div className="pt-3 border-t border-neutral-300 dark:border-neutral-700">
+            <h4 className="font-semibold mb-1">Documentación requerida</h4>
+            <ul className="list-disc ml-5 text-neutral-700 dark:text-neutral-300">
+              <li>Factura comercial</li>
+              <li>Remito / guía de carga</li>
+              <li>Documentación del transportista</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* FOOTER */}
+      <div className="flex items-center justify-between mt-4">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="rounded-md bg-gray-200 px-3 py-1 text-sm hover:bg-gray-300 
+                     dark:bg-gray-700 dark:hover:bg-gray-600"
+        >
+          {expanded ? "Mostrar menos" : "Mostrar más"}
+        </button>
+
+        <div className="flex gap-2">
           <button
-            type="button"
-            className="flex items-center gap-1.5 text-sm font-medium text-[#005A9C] transition hover:underline"
+            className="flex items-center gap-1 rounded-md bg-gray-300 px-3 py-1 text-sm 
+                       hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
           >
-            <Edit3 className="h-4 w-4" />
-            <span>Editar</span>
+            <Pencil size={16} />
+            Editar
           </button>
 
           <button
-            type="button"
-            className="flex items-center gap-1.5 text-sm font-medium text-red-600 transition hover:underline dark:text-red-500"
+            className="flex items-center gap-1 rounded-md bg-red-300 px-3 py-1 text-sm 
+                       text-red-900 hover:bg-red-400 dark:bg-red-900 dark:text-red-300 
+                       dark:hover:bg-red-800"
           >
-            <Trash2 className="h-4 w-4" />
-            <span>Eliminar</span>
+            <Trash2 size={16} />
+            Borrar
           </button>
         </div>
       </div>

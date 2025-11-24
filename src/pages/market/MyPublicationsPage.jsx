@@ -1,51 +1,27 @@
-import React, { useState, useMemo } from "react"
+import React, { useState } from "react"
 import { useMyPublications } from "../../hooks/useMyPublications"
 import PublicationCard from "../../components/market/PublicationCard"
-import { PlusCircle, Search, Filter, ArrowUpDown } from "lucide-react"
+import { Link } from "react-router-dom"
 
-function MyPublicationsPage() {
+const MyPublicationsPage = () => {
   const { data, loading, error } = useMyPublications()
 
+  const [filter, setFilter] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("date_desc")
+  const [fadeKey, setFadeKey] = useState("initial") // ← controla el fade-in
 
-  // 🟦 FIX: hooks deben ejecutarse SIEMPRE, aunque data sea null
-  const publications = data?.publications ?? []
+  // 🔥 Cada vez que cambia un filtro, se activa un fade nuevo
+  const triggerFade = (value) => {
+    setFilter(value)
+    setFadeKey(value + "-" + Date.now())
+  }
 
-  const filteredPublications = useMemo(() => {
-    let list = [...publications]
-
-    // search
-    if (searchTerm.trim() !== "") {
-      const term = searchTerm.toLowerCase()
-      list = list.filter(item => {
-        const origin = (item.origin || "").toLowerCase()
-        const dest = (item.destination || "").toLowerCase()
-        return origin.includes(term) || dest.includes(term)
-      })
-    }
-
-    if (statusFilter !== "all") {
-      list = list.filter(item =>
-        (item.status || "").toLowerCase().includes(statusFilter)
-      )
-    }
-
-    list.sort((a, b) => {
-      const aDate = new Date(a.available_date || a.ready_date || a.created_at || 0)
-      const bDate = new Date(b.available_date || b.ready_date || b.created_at || 0)
-      return sortBy === "date_asc" ? aDate - bDate : bDate - aDate
-    })
-
-    return list
-  }, [publications, searchTerm, statusFilter, sortBy])
-
-  // 🟩 Recién AHORA los returns condicionales
   if (loading) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center">
-        <p className="animate-pulse text-lg">Cargando tus publicaciones...</p>
+        <p className="animate-pulse text-lg font-medium text-neutral-700 dark:text-neutral-200">
+          Cargando tus publicaciones...
+        </p>
       </div>
     )
   }
@@ -58,28 +34,177 @@ function MyPublicationsPage() {
     )
   }
 
-  if (publications.length === 0) {
+  if (!data || data.total === 0) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center">
-        <p>No tienes publicaciones todavía.</p>
+        <p className="text-neutral-600 dark:text-neutral-300">
+          No tienes publicaciones todavía.
+        </p>
       </div>
     )
   }
 
-  // 🔵 Render normal
+  // Normalize role
+  let normalizedRole = "dual"
+  if (data.role === "transportista") normalizedRole = "offer"
+  if (data.role === "empresa") normalizedRole = "request"
+
+  const offers = data.publications.filter(p => p.vehicle_type)
+  const requests = data.publications.filter(p => p.required_vehicle_type)
+
+  // SEARCH FILTER
+  const applySearch = (list) => {
+    const t = searchTerm.trim().toLowerCase()
+    if (!t) return list
+
+    return list.filter(item => {
+      const o = item.origin?.toLowerCase() || ""
+      const d = item.destination?.toLowerCase() || ""
+      return o.startsWith(t) || d.startsWith(t)
+    })
+  }
+
+  const filteredOffers = applySearch(offers)
+  const filteredRequests = applySearch(requests)
+
+  // FINAL FILTER
+  let finalPublications = []
+  if (normalizedRole === "offer") {
+    finalPublications = filteredOffers
+  } else if (normalizedRole === "request") {
+    finalPublications = filteredRequests
+  } else {
+    if (filter === "offers") finalPublications = filteredOffers
+    else if (filter === "requests") finalPublications = filteredRequests
+    else finalPublications = [...filteredOffers, ...filteredRequests]
+  }
+
   return (
-    <div className="min-h-[calc(100vh-64px)] w-full bg-white dark:bg-neutral-900">
-      <div className="mx-auto max-w-[960px] flex flex-col px-4 py-8">
+    <div className="flex flex-col w-full max-w-5xl mx-auto p-6 gap-8">
 
-        {/* ... resto de la UI ... */}
+      {/* TITLE */}
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <h1 className="text-4xl font-black text-neutral-900 dark:text-neutral-100">
+          Mis Publicaciones
+        </h1>
 
-        <section className="mt-6 space-y-4">
-          {filteredPublications.map(item => (
-            <PublicationCard key={item.id} item={item} />
-          ))}
-        </section>
+      <Link
+        to="/mercado/create"
+        className="
+          flex items-center justify-center gap-2 h-10 px-4
+          text-sm font-bold tracking-wide
+          rounded-lg shadow-sm transition-all duration-300
+
+          /* MODO CLARO */
+          bg-white text-neutral-900 border border-gray-300
+
+          /* MODO OSCURO */
+          dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700
+
+          /* HOVER */
+          hover:bg-gray-100 dark:hover:bg-gray-700
+        "
+      >
+        <span className="material-symbols-outlined text-xl">
+          add_circle
+        </span>
+        Nueva Publicación
+      </Link>
+
+
 
       </div>
+
+      {/* SEARCH + FILTERS */}
+      <div className="flex flex-col sm:flex-row gap-3 py-3">
+        
+        {/* Search */}
+        <label className="flex flex-col min-w-40 h-11 w-full sm:flex-1">
+          <div className="flex w-full items-stretch rounded-lg h-full">
+            <div className="text-gray-500 dark:text-gray-400 flex items-center justify-center bg-gray-100 dark:bg-gray-800 pl-3.5 rounded-l-lg">
+              <span className="material-symbols-outlined text-xl">search</span>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Buscar por Origen o Destino"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="
+                form-input w-full rounded-r-lg px-3 text-sm
+                bg-gray-100 dark:bg-gray-800
+                text-neutral-900 dark:text-gray-200
+                border-none focus:ring-0
+                placeholder:text-gray-500 dark:placeholder:text-gray-400
+              "
+            />
+          </div>
+        </label>
+
+        {/* FILTER BUTTONS */}
+        {normalizedRole === "dual" && (
+          <div className="flex gap-3">
+            
+            <button
+              onClick={() => triggerFade("all")}
+              className={`
+                h-11 px-4 rounded-lg text-sm font-medium transition
+                ${filter === "all"
+                  ? "bg-primary"
+                  : "bg-gray-100 dark:bg-gray-800"}
+                text-gray-900 dark:text-gray-200
+              `}
+            >
+              Todo
+            </button>
+
+            <button
+              onClick={() => triggerFade("offers")}
+              className={`
+                h-11 px-4 rounded-lg text-sm font-medium transition
+                ${filter === "offers"
+                  ? "bg-amber-600"
+                  : "bg-gray-100 dark:bg-gray-800"}
+                text-gray-900 dark:text-gray-200
+              `}
+            >
+              Ofertas
+            </button>
+
+            <button
+              onClick={() => triggerFade("requests")}
+              className={`
+                h-11 px-4 rounded-lg text-sm font-medium transition
+                ${filter === "requests"
+                  ? "bg-cyan-600"
+                  : "bg-gray-100 dark:bg-gray-800"}
+                text-gray-900 dark:text-gray-200
+              `}
+            >
+              Solicitudes
+            </button>
+
+          </div>
+        )}
+      </div>
+
+      {/* PUBLICATIONS LIST — con FADING REAL */}
+      <div
+        key={fadeKey}
+        className="space-y-4 animate-fadeIn"
+      >
+        {finalPublications.length === 0 ? (
+          <p className="text-neutral-500 dark:text-neutral-400">No hay publicaciones</p>
+        ) : (
+          finalPublications.map(item => (
+            <PublicationCard
+              key={`${filter}-${searchTerm}-${item.id}`}
+              item={item}
+            />
+          ))
+        )}
+      </div>
+
     </div>
   )
 }
