@@ -11,7 +11,7 @@ import {
   deleteRequest,
 } from "../../services/market.service"
 
-const PublicationCard = ({ item }) => {
+const PublicationCard = ({ item, onUpdate }) => {
   const [expanded, setExpanded] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
@@ -96,7 +96,7 @@ const PublicationCard = ({ item }) => {
       else await deleteRequest(item.id)
 
       setIsDeleteOpen(false)
-      window.location.reload()
+      if (onUpdate) onUpdate()
     } catch (e) {
       console.error(e)
       alert("No se pudo eliminar")
@@ -176,7 +176,7 @@ const PublicationCard = ({ item }) => {
       else await updateRequestDocuments(item.id, editSelectedDocs)
 
       setIsEditOpen(false)
-      window.location.reload()
+      if (onUpdate) onUpdate()
     } catch (e) {
       console.error(e)
       alert("Error guardando cambios")

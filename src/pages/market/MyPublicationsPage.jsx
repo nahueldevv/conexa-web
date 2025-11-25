@@ -4,7 +4,7 @@ import PublicationCard from "../../components/market/PublicationCard"
 import { Link } from "react-router-dom"
 
 const MyPublicationsPage = () => {
-  const { data, loading, error } = useMyPublications()
+  const { data, loading, error, refetchData } = useMyPublications()
 
   const [filter, setFilter] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
@@ -200,6 +200,7 @@ const MyPublicationsPage = () => {
             <PublicationCard
               key={`${filter}-${searchTerm}-${item.id}`}
               item={item}
+              onUpdate={refetchData}
             />
           ))
         )}
