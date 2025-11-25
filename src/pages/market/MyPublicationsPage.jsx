@@ -1,213 +1,175 @@
-import React, { useState } from "react"
-import { useMyPublications } from "../../hooks/useMyPublications"
-import PublicationCard from "../../components/market/PublicationCard"
-import { Link } from "react-router-dom"
+import React, { useState } from "react";
+import { useMyPublications } from "../../hooks/useMyPublications";
+import PublicationCard from "../../components/market/PublicationCard";
+import { Link } from "react-router-dom";
+import { PlusCircle, Search, Filter, ListFilter } from "lucide-react";
 
 const MyPublicationsPage = () => {
-  const { data, loading, error, refetchData } = useMyPublications()
+  const { data, loading, error, refetchData } = useMyPublications();
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [filter, setFilter] = useState("all")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [fadeKey, setFadeKey] = useState("initial") // ← controla el fade-in
+  // Normalización de datos
+  const finalPublications = data?.publications || [];
+  const normalizedRole =
+    data?.role === "transportista"
+      ? "offer"
+      : data?.role === "empresa"
+      ? "request"
+      : "dual";
 
-  // 🔥 Cada vez que cambia un filtro, se activa un fade nuevo
-  const triggerFade = (value) => {
-    setFilter(value)
-    setFadeKey(value + "-" + Date.now())
-  }
+  // Lógica de Filtrado
+  const filterList = (list) => {
+    return list.filter((item) => {
+      // Filtro de Texto
+      const term = searchTerm.toLowerCase();
+      const matchesSearch =
+        (item.origin || "").toLowerCase().includes(term) ||
+        (item.destination || "").toLowerCase().includes(term);
 
-  if (loading) {
+      // Filtro de Tipo (Solo para Dual)
+      let matchesType = true;
+      if (normalizedRole === "dual") {
+        if (filter === "offers") matchesType = !!item.vehicle_type;
+        if (filter === "requests") matchesType = !!item.required_vehicle_type;
+      }
+
+      return matchesSearch && matchesType;
+    });
+  };
+
+  const displayedPublications = filterList(finalPublications);
+
+  if (loading)
     return (
-      <div className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center">
-        <p className="animate-pulse text-lg font-medium text-neutral-700 dark:text-neutral-200">
-          Cargando tus publicaciones...
-        </p>
+      <div className="flex h-screen items-center justify-center text-gray-500">
+        Cargando...
       </div>
-    )
-  }
-
-  if (error) {
+    );
+  if (error)
     return (
-      <div className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center">
-        <p className="text-red-500">Error: {error}</p>
+      <div className="flex h-screen items-center justify-center text-red-500">
+        {error}
       </div>
-    )
-  }
-
-  if (!data || data.total === 0) {
-    return (
-      <div className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center">
-        <p className="text-neutral-600 dark:text-neutral-300">
-          No tienes publicaciones todavía.
-        </p>
-      </div>
-    )
-  }
-
-  // Normalize role
-  let normalizedRole = "dual"
-  if (data.role === "transportista") normalizedRole = "offer"
-  if (data.role === "empresa") normalizedRole = "request"
-
-  const offers = data.publications.filter(p => p.vehicle_type)
-  const requests = data.publications.filter(p => p.required_vehicle_type)
-
-  // SEARCH FILTER
-  const applySearch = (list) => {
-    const t = searchTerm.trim().toLowerCase()
-    if (!t) return list
-
-    return list.filter(item => {
-      const o = item.origin?.toLowerCase() || ""
-      const d = item.destination?.toLowerCase() || ""
-      return o.startsWith(t) || d.startsWith(t)
-    })
-  }
-
-  const filteredOffers = applySearch(offers)
-  const filteredRequests = applySearch(requests)
-
-  // FINAL FILTER
-  let finalPublications = []
-  if (normalizedRole === "offer") {
-    finalPublications = filteredOffers
-  } else if (normalizedRole === "request") {
-    finalPublications = filteredRequests
-  } else {
-    if (filter === "offers") finalPublications = filteredOffers
-    else if (filter === "requests") finalPublications = filteredRequests
-    else finalPublications = [...filteredOffers, ...filteredRequests]
-  }
+    );
 
   return (
-    <div className="flex flex-col w-full max-w-5xl mx-auto p-6 gap-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0A0A0A] font-display text-gray-900 dark:text-gray-200 pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+        {/* HEADER CLEAN */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 border-b border-gray-200 dark:border-white/10 pb-6">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight text-gray-900 dark:text-white mb-2">
+              Mis Publicaciones
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">
+              Gestiona y edita tus ofertas y solicitudes activas.
+            </p>
+          </div>
 
-      {/* TITLE */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <h1 className="text-4xl font-black text-neutral-900 dark:text-neutral-100">
-          Mis Publicaciones
-        </h1>
+          <Link
+            to="/mercado/create"
+            className="flex items-center justify-center gap-2 bg-[#005A9C] hover:bg-[#004a80] text-white font-bold py-3 px-6 rounded-lg shadow-sm transition-all active:scale-95"
+          >
+            <PlusCircle size={20} />
+            <span>Nueva Publicación</span>
+          </Link>
+        </div>
 
-      <Link
-        to="/mercado/create"
-        className="
-          flex items-center justify-center gap-2 h-10 px-4
-          text-sm font-bold tracking-wide
-          rounded-lg shadow-sm transition-all duration-300
-
-          /* MODO CLARO */
-          bg-white text-neutral-900 border border-gray-300
-
-          /* MODO OSCURO */
-          dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700
-
-          /* HOVER */
-          hover:bg-gray-100 dark:hover:bg-gray-700
-        "
-      >
-        <span className="material-symbols-outlined text-xl">
-          add_circle
-        </span>
-        Nueva Publicación
-      </Link>
-
-
-
-      </div>
-
-      {/* SEARCH + FILTERS */}
-      <div className="flex flex-col sm:flex-row gap-3 py-3">
-        
-        {/* Search */}
-        <label className="flex flex-col min-w-40 h-11 w-full sm:flex-1">
-          <div className="flex w-full items-stretch rounded-lg h-full">
-            <div className="text-gray-500 dark:text-gray-400 flex items-center justify-center bg-gray-100 dark:bg-gray-800 pl-3.5 rounded-l-lg">
-              <span className="material-symbols-outlined text-xl">search</span>
+        {/* BARRA DE HERRAMIENTAS */}
+        <div className="bg-white dark:bg-[#111111] p-2 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 mb-6 flex flex-col md:flex-row gap-2 items-center">
+          {/* Buscador Estilizado */}
+          <div className="relative grow w-full md:w-auto">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
-
             <input
               type="text"
-              placeholder="Buscar por Origen o Destino"
+              placeholder="Buscar por origen o destino..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="
-                form-input w-full rounded-r-lg px-3 text-sm
-                bg-gray-100 dark:bg-gray-800
-                text-neutral-900 dark:text-gray-200
-                border-none focus:ring-0
-                placeholder:text-gray-500 dark:placeholder:text-gray-400
-              "
+              className="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-transparent text-gray-900 dark:text-white placeholder-gray-500 focus:ring-0 sm:text-sm"
             />
           </div>
-        </label>
 
-        {/* FILTER BUTTONS */}
-        {normalizedRole === "dual" && (
-          <div className="flex gap-3">
-            
-            <button
-              onClick={() => triggerFade("all")}
-              className={`
-                h-11 px-4 rounded-lg text-sm font-medium transition
-                ${filter === "all"
-                  ? "bg-primary"
-                  : "bg-gray-100 dark:bg-gray-800"}
-                text-gray-900 dark:text-gray-200
-              `}
-            >
-              Todo
+          {/* Separador Vertical (Desktop) */}
+          <div className="hidden md:block w-px h-8 bg-gray-200 dark:bg-white/10 mx-2"></div>
+
+          {/* Filtros (Solo Dual) */}
+          {normalizedRole === "dual" && (
+            <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-lg">
+              <button
+                onClick={() => setFilter("all")}
+                className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                  filter === "all"
+                    ? "bg-white dark:bg-[#222] text-black dark:text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Todo
+              </button>
+              <button
+                onClick={() => setFilter("offers")}
+                className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                  filter === "offers"
+                    ? "bg-white dark:bg-[#222] text-black dark:text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Ofertas
+              </button>
+              <button
+                onClick={() => setFilter("requests")}
+                className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                  filter === "requests"
+                    ? "bg-white dark:bg-[#222] text-black dark:text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Demandas
+              </button>
+            </div>
+          )}
+
+          <div className="flex gap-2 w-full md:w-auto justify-end px-2">
+            <button className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg text-sm font-medium transition-colors">
+              <Filter size={18} />{" "}
+              <span className="hidden sm:inline">Estado</span>
             </button>
-
-            <button
-              onClick={() => triggerFade("offers")}
-              className={`
-                h-11 px-4 rounded-lg text-sm font-medium transition
-                ${filter === "offers"
-                  ? "bg-amber-600"
-                  : "bg-gray-100 dark:bg-gray-800"}
-                text-gray-900 dark:text-gray-200
-              `}
-            >
-              Ofertas
+            <button className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg text-sm font-medium transition-colors">
+              <ListFilter size={18} />{" "}
+              <span className="hidden sm:inline">Fecha</span>
             </button>
-
-            <button
-              onClick={() => triggerFade("requests")}
-              className={`
-                h-11 px-4 rounded-lg text-sm font-medium transition
-                ${filter === "requests"
-                  ? "bg-cyan-600"
-                  : "bg-gray-100 dark:bg-gray-800"}
-                text-gray-900 dark:text-gray-200
-              `}
-            >
-              Solicitudes
-            </button>
-
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* PUBLICATIONS LIST — con FADING REAL */}
-      <div
-        key={fadeKey}
-        className="space-y-4 animate-fadeIn"
-      >
-        {finalPublications.length === 0 ? (
-          <p className="text-neutral-500 dark:text-neutral-400">No hay publicaciones</p>
-        ) : (
-          finalPublications.map(item => (
-            <PublicationCard
-              key={`${filter}-${searchTerm}-${item.id}`}
-              item={item}
-              onUpdate={refetchData}
-            />
-          ))
-        )}
+        {/* LISTADO DE TARJETAS */}
+        <div className="space-y-4">
+          {displayedPublications.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 mb-4">
+                <Search className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                No se encontraron resultados
+              </h3>
+              <p className="mt-1 text-gray-500 dark:text-gray-400">
+                Intenta ajustar los filtros o crea una nueva publicación.
+              </p>
+            </div>
+          ) : (
+            displayedPublications.map((item) => (
+              <PublicationCard
+                key={item.id}
+                item={item}
+                onUpdate={refetchData}
+              />
+            ))
+          )}
+        </div>
       </div>
-
     </div>
-  )
-}
+  );
+};
 
-export default MyPublicationsPage
+export default MyPublicationsPage;
