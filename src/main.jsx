@@ -9,7 +9,7 @@ import HomePage from "./pages/HomePage.jsx"
 import RegisterPage from "./pages/RegisterPage.jsx"
 import LoginPage from "./pages/LoginPage.jsx"
 import CommunityPage from "./pages/community/CommunityPage.jsx"
-import AboutPage from "./pages/AboutPage.jsx"
+import MessagePage from "./pages/MessagePage.jsx"
 
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx"
 import ProfilePage from "./pages/ProfilePage.jsx"
@@ -27,7 +27,7 @@ const router = createBrowserRouter([
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },
       { path: "/community", element: <CommunityPage /> },
-      { path: "/about", element: <AboutPage /> },
+      { path: "/about", element: <MessagePage /> },
       {
         element: <ProtectedRoute />,
         children: [

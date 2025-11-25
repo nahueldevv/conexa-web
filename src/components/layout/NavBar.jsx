@@ -83,21 +83,21 @@ function Navbar() {
               <nav className="flex items-center gap-8">
                 <Link
                   to="/mercado"
-                  className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-white"
+                  className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-amber-400"
                 >
                   Mercado Logístico
                 </Link>
                 <Link
                   to="/community"
-                  className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-white"
+                  className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-amber-400"
                 >
                   Portal Comunitario
                 </Link>
                 <Link
                   to="/about"
-                  className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-white"
+                  className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-amber-400"
                 >
-                  Nosotros
+                  Mensajes
                 </Link>
               </nav>
 
@@ -105,7 +105,7 @@ function Navbar() {
                 <div className="flex items-center gap-4">
                   <Link
                     to="/login"
-                    className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-white"
+                    className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-amber-400"
                   >
                     Iniciar Sesión
                   </Link>
