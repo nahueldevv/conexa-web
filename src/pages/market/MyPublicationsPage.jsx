@@ -68,7 +68,7 @@ const MyPublicationsPage = () => {
           </div>
 
           <Link
-            to="/mercado/create"
+            to="/marketplace/create"
             className="flex items-center justify-center gap-2 bg-[#005A9C] hover:bg-[#004a80] text-white font-bold py-3 px-6 rounded-lg shadow-sm transition-all active:scale-95"
           >
             <PlusCircle size={20} />

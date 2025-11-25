@@ -80,27 +80,6 @@ function Navbar() {
             </Link>
 
             <div className="hidden items-center gap-8 md:flex">
-              <nav className="flex items-center gap-8">
-                <Link
-                  to="/mercado"
-                  className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-amber-400"
-                >
-                  Mercado Logístico
-                </Link>
-                <Link
-                  to="/community"
-                  className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-amber-400"
-                >
-                  Portal Comunitario
-                </Link>
-                <Link
-                  to="/about"
-                  className="text-sm font-medium text-neutral-600 dark:text-white/80 transition-colors hover:text-neutral-900 dark:hover:text-amber-400"
-                >
-                  Mensajes
-                </Link>
-              </nav>
-
               {!isAuthenticated ? (
                 <div className="flex items-center gap-4">
                   <Link
