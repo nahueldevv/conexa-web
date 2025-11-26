@@ -19,7 +19,7 @@ import ProfilePage from "./pages/ProfilePage.jsx"
 import DashboardPage from "./pages/market/DashboardPage.jsx"
 import MyPublicationsPage from "./pages/market/MyPublicationsPage.jsx"
 import CreatePublicationPage from "./pages/market/CreatePublicationPage.jsx"
-import CommunityTestSuite from "./CommunityTestSuite.jsx"
+import PostDetailPlaceholder from "./pages/community/PostDetailPlaceholder.jsx"
 
 const router = createBrowserRouter([
   {
@@ -31,6 +31,7 @@ const router = createBrowserRouter([
       { path: "/login", element: <LoginPage /> },
       // { path: "/community", element: <CommunityPage /> },
       { path: "/community", element: <CommunityPage /> },
+      { path: "/community/post/:id", element: <PostDetailPlaceholder /> },
       {
         element: <ProtectedRoute />,
         children: [
