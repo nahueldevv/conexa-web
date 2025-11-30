@@ -21,6 +21,7 @@ import DashboardPage from "./pages/market/DashboardPage.jsx"
 import MyPublicationsPage from "./pages/market/MyPublicationsPage.jsx"
 import CreatePublicationPage from "./pages/market/CreatePublicationPage.jsx"
 import PostDetailPage from "./pages/community/PostDetailPage.jsx"
+import CreatePostPage from "./pages/community/CreatePostPage.jsx"
 
 import AgreementPage from "./pages/market/AgreementPage.jsx"
 import TrackingPage from "./pages/market/TrackingPage.jsx"
@@ -34,9 +35,6 @@ const router = createBrowserRouter([
       { path: "/", element: <HomePage /> },
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },
-      // { path: "/community", element: <CommunityPage /> },
-      { path: "/community", element: <CommunityPage /> },
-      { path: "/community/post/:id", element: <PostDetailPage/>},
       {
         element: <ProtectedRoute />,
         children: [
@@ -48,6 +46,9 @@ const router = createBrowserRouter([
           { path: "/marketplace/agreement/:id", element: <AgreementPage /> },
           { path: "/marketplace/shipments/:id/tracking", element: <TrackingPage /> },
           { path: "/marketplace/shipments", element: <MyShipmentsPage /> },
+          { path: "/community", element: <CommunityPage /> },
+          { path: "/community/create", element: <CreatePostPage /> },
+          { path: "/community/post/:id", element: <PostDetailPage/>},
           { path: "/settings", element: <SettingsPage /> },
         ]
       }
