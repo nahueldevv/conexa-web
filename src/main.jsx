@@ -1,3 +1,4 @@
+// main.jsx
 import React from "react"
 import ReactDOM from "react-dom/client"
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
@@ -10,6 +11,8 @@ import HomePage from "./pages/HomePage.jsx"
 import RegisterPage from "./pages/RegisterPage.jsx"
 import LoginPage from "./pages/LoginPage.jsx"
 import CommunityPage from "./pages/community/CommunityPage.jsx"
+// 🚨 Importación CRÍTICA
+import CreatePostPage from "./pages/community/CreatePostPage.jsx" 
 import SettingsPage from "./pages/SettingsPage.jsx"
 
 import InboxPage from "./pages/messages/InboxPage.jsx"
@@ -56,12 +59,11 @@ const router = createBrowserRouter([
 ])
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <AuthProvider>
-      {/* 2. AGREGAR CHAT PROVIDER AQUÍ DENTRO */}
-      <ChatProvider>
-        <RouterProvider router={router} />
-      </ChatProvider>
-    </AuthProvider>
-  </React.StrictMode>
+  <React.StrictMode>
+    <AuthProvider>
+      <ChatProvider>
+        <RouterProvider router={router} />
+      </ChatProvider>
+    </AuthProvider>
+  </React.StrictMode>
 )

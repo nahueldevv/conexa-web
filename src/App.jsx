@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import Sidebar from "./components/layout/Sidebar"
 import Navbar from "./components/layout/Navbar" // Asegúrate de que este archivo exista
 import { useAuth } from "./context/AuthContext"
+import { Routes, Route } from 'react-router-dom';
+
 
 function App() {
   const { isAuthenticated } = useAuth()
