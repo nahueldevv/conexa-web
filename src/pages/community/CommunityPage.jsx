@@ -18,7 +18,7 @@ import {
   ThumbsUp,
   Hash,
 } from "lucide-react"
-import Navbar from "../../components/layout/Navbar"
+import Navbar from "../../components/layout/NavBar"
 
 // --- SUB-COMPONENTE: DASHBOARD DE ESTADÍSTICAS ---
 const CommunityStats = () => (
