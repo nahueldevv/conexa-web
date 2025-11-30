@@ -27,7 +27,7 @@ importers:
         specifier: ^7.9.5
         version: 7.9.5(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       socket.io-client:
-        specifier: ^4.8.1
+        specifier: 4.8.1
         version: 4.8.1
       tailwindcss:
         specifier: ^4.1.17
