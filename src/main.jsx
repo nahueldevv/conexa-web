@@ -22,6 +22,10 @@ import MyPublicationsPage from "./pages/market/MyPublicationsPage.jsx"
 import CreatePublicationPage from "./pages/market/CreatePublicationPage.jsx"
 import PostDetailPage from "./pages/community/PostDetailPage.jsx"
 
+import AgreementPage from "./pages/market/AgreementPage.jsx"
+import TrackingPage from "./pages/market/TrackingPage.jsx"
+import MyShipmentsPage from "./pages/market/MyShipmentsPage.jsx"
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -41,6 +45,9 @@ const router = createBrowserRouter([
           { path: "/messages", element: <InboxPage /> },
           { path: "/marketplace/create", element: <CreatePublicationPage /> },
           { path: "/marketplace/my-publications", element: <MyPublicationsPage /> },
+          { path: "/marketplace/agreement/:id", element: <AgreementPage /> },
+          { path: "/marketplace/shipments/:id/tracking", element: <TrackingPage /> },
+          { path: "/marketplace/shipments", element: <MyShipmentsPage /> },
           { path: "/settings", element: <SettingsPage /> },
         ]
       }
