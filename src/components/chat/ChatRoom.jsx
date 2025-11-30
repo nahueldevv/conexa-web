@@ -13,12 +13,22 @@ import {
 import { useChat } from "../../hooks/useChat"
 import { useAuth } from "../../context/AuthContext"
 
+import { useLocation } from "react-router-dom"
+import ChatDealSidebar from "./ChatDealSidebar"
+
 const ChatRoom = ({ conversationId, partnerName, initialMessage }) => {
   const { user } = useAuth()
-  const { messages, loadingHistory, sendMessage, isConnected } = useChat(conversationId)
+  const { messages, loadingHistory, sendMessage, isConnected } =
+    useChat(conversationId)
+
+  const location = useLocation()
 
   const [newMessage, setNewMessage] = useState("")
   const [showOptions, setShowOptions] = useState(false)
+
+  const [showDealSidebar, setShowDealSidebar] = useState(false)
+  const [negotiationContext, setNegotiationContext] = useState(null)
+
   const messagesEndRef = useRef(null)
   const optionsRef = useRef(null)
 
@@ -45,6 +55,23 @@ const ChatRoom = ({ conversationId, partnerName, initialMessage }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  // --- LÓGICA DE PERSISTENCIA DEL CONTEXTO ---
+  useEffect(() => {
+    const storageKey = `deal_context_${conversationId}`;
+
+    if (location.state?.negotiationContext) {
+      // A. Si venimos de "Contactar", guardamos los datos nuevos
+      setNegotiationContext(location.state.negotiationContext)
+      sessionStorage.setItem(storageKey, JSON.stringify(location.state.negotiationContext))
+    } else {
+      // B. Si no hay estado (F5 o navegación manual), intentamos recuperar memoria
+      const storedContext = sessionStorage.getItem(storageKey)
+      if (storedContext) {
+        setNegotiationContext(JSON.parse(storedContext))
+      }
+    }
+  }, [location.state, conversationId])
+
   const handleSend = (e) => {
     e.preventDefault()
     if (!newMessage.trim() || !isConnected) return
@@ -62,8 +89,7 @@ const ChatRoom = ({ conversationId, partnerName, initialMessage }) => {
 
   return (
     // CONTENEDOR PRINCIPAL: Blanco en Light, Negro Profundo en Dark
-    <div className="flex flex-col h-full bg-white dark:bg-[#0A0A0A]">
-      
+    <div className="flex flex-col h-full bg-white dark:bg-[#0A0A0A] relative overflow-hidden">
       {/* 1. HEADER */}
       <div className="flex h-20 items-center justify-between border-b border-gray-200 dark:border-white/10 px-6 bg-white dark:bg-[#0A0A0A] shrink-0 transition-colors">
         <div className="flex items-center gap-4">
@@ -105,7 +131,9 @@ const ChatRoom = ({ conversationId, partnerName, initialMessage }) => {
             <button
               onClick={() => setShowOptions(!showOptions)}
               className={`flex h-10 w-10 items-center justify-center rounded-full text-gray-500 dark:text-white/70 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors ${
-                showOptions ? "bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white" : ""
+                showOptions
+                  ? "bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white"
+                  : ""
               }`}
               title="Opciones"
             >
@@ -114,7 +142,13 @@ const ChatRoom = ({ conversationId, partnerName, initialMessage }) => {
 
             {showOptions && (
               <div className="absolute right-0 top-12 w-56 bg-white dark:bg-[#191919] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl z-50 overflow-hidden animate-fadeIn">
-                <button className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors">
+                <button
+                  onClick={() => {
+                    setShowOptions(false)
+                    setShowDealSidebar(true)
+                  }}
+                  className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+                >
                   <FileText size={16} className="text-amber-500" />
                   Ver detalles de la oferta
                 </button>
@@ -183,7 +217,12 @@ const ChatRoom = ({ conversationId, partnerName, initialMessage }) => {
                     }`}
                   >
                     <span>{formatTime(msg.created_at || msg.timestamp)}</span>
-                    {isMe && <CheckCheck size={12} className="text-blue-500 dark:text-blue-400" />}
+                    {isMe && (
+                      <CheckCheck
+                        size={12}
+                        className="text-blue-500 dark:text-blue-400"
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -233,6 +272,13 @@ const ChatRoom = ({ conversationId, partnerName, initialMessage }) => {
           </button>
         </form>
       </div>
+      <ChatDealSidebar
+        isOpen={showDealSidebar}
+        onClose={() => setShowDealSidebar(false)}
+        contextData={negotiationContext}
+        partnerName={partnerName}
+        conversationId={conversationId}
+      />
     </div>
   )
 }

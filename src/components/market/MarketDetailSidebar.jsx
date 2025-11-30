@@ -59,12 +59,20 @@ const MarketDetailSidebar = ({ item, onClose, isOpen }) => {
       // 1. Init conversation (REST)
       const conversation = await initConversation(user.id, ownerId);
       const contextMessage = `Hola, estoy interesado en tu ${isOffer ? "oferta de transporte" : "solicitud de carga"}: ${item.origin} ➝ ${item.destination} (${item.cargo_type}).`
+
+      const negotiationContext = {
+        marketItemId: item.id, // ID de la publicación
+        type: isOffer ? 'offer' : 'request', // Tipo
+        title: `${item.origin} ➝ ${item.destination}`, // Título visual
+        subtitle: `${item.cargo_type} • ${item.weight_kg}kg` // Subtítulo visual
+      }
       
       // 2. Redirect to Inbox with state (Magic Jump)
       navigate("/messages", { 
         state: { 
           selectedChatId: conversation.id,
-          initialMessage: contextMessage
+          initialMessage: contextMessage,
+          negotiationContext: negotiationContext
         }
       });
     } catch (error) {

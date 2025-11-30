@@ -25,33 +25,37 @@ import MyPublicationsPage from "./pages/market/MyPublicationsPage.jsx"
 import CreatePublicationPage from "./pages/market/CreatePublicationPage.jsx"
 import PostDetailPage from "./pages/community/PostDetailPage.jsx"
 
+import AgreementPage from "./pages/market/AgreementPage.jsx"
+import TrackingPage from "./pages/market/TrackingPage.jsx"
+import MyShipmentsPage from "./pages/market/MyShipmentsPage.jsx"
+
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    // Opcional: Esto captura el error de componente que estabas viendo
-    errorElement: <div>¡Oops! Un error inesperado. Por favor, vuelve a la página anterior.</div>,
-    children: [
-      { path: "/", element: <HomePage /> },
-      { path: "/register", element: <RegisterPage /> },
-      { path: "/login", element: <LoginPage /> },
-      { path: "/community", element: <CommunityPage /> },
-      // 🛑 CORRECCIÓN CRÍTICA: La ruta que faltaba
-      { path: "/community/create", element: <CreatePostPage /> }, 
-      { path: "/community/post/:id", element: <PostDetailPage/>},
-      {
-        element: <ProtectedRoute />,
-        children: [
-          { path: "/marketplace", element: <DashboardPage /> },
-          { path: "/profile", element: <ProfilePage /> },
-          { path: "/messages", element: <InboxPage /> },
-          { path: "/marketplace/create", element: <CreatePublicationPage /> },
-          { path: "/marketplace/my-publications", element: <MyPublicationsPage /> },
-          { path: "/settings", element: <SettingsPage /> },
-        ]
-      }
-    ]
-  }
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      { path: "/", element: <HomePage /> },
+      { path: "/register", element: <RegisterPage /> },
+      { path: "/login", element: <LoginPage /> },
+      // { path: "/community", element: <CommunityPage /> },
+      { path: "/community", element: <CommunityPage /> },
+      { path: "/community/post/:id", element: <PostDetailPage/>},
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: "/marketplace", element: <DashboardPage /> },
+          { path: "/profile", element: <ProfilePage /> },
+          { path: "/messages", element: <InboxPage /> },
+          { path: "/marketplace/create", element: <CreatePublicationPage /> },
+          { path: "/marketplace/my-publications", element: <MyPublicationsPage /> },
+          { path: "/marketplace/agreement/:id", element: <AgreementPage /> },
+          { path: "/marketplace/shipments/:id/tracking", element: <TrackingPage /> },
+          { path: "/marketplace/shipments", element: <MyShipmentsPage /> },
+          { path: "/settings", element: <SettingsPage /> },
+        ]
+      }
+    ]
+  }
 ])
 
 ReactDOM.createRoot(document.getElementById("root")).render(
