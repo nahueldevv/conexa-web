@@ -52,8 +52,6 @@ export const usePostThread = (postId) => {
 
   // 2. Eliminar Comentario (Optimistic Update)
   const removeLocalComment = async (commentId) => {
-    if (!confirm("Confirm to delete comment")) return
-
     const previousComments = comments
     setComments(comments.filter(c => c.id !== commentId)) // Optimistic UI
 
