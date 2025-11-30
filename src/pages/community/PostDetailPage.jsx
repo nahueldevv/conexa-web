@@ -20,7 +20,7 @@ import {
 import { usePostThread } from "../../hooks/usePostThread";
 import { deletePost } from "../../services/community.service";
 import CommentCard from "../../components/community/CommentCard";
-import Navbar from "../../components/layout/Navbar";
+import Navbar from "../../components/layout/NavBar";
 import { useAuth } from "../../context/AuthContext";
 
 // Helper para iniciales
