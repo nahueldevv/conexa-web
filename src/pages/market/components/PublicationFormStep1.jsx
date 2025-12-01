@@ -9,11 +9,14 @@ import {
   Calendar,
   FileText,
   ChevronDown,
-  Scale, // Nuevo icono Peso
-  Box, // Nuevo icono Volumen
-  Layers, // Nuevo icono Cantidad
+  Scale,
+  Box,
+  Layers,
 } from "lucide-react"
 import { Link } from "react-router-dom"
+
+// IMPORTAMOS LAS UBICACIONES DEFINIDAS
+import { AVAILABLE_LOCATIONS } from "../../../constants/marketOptions"
 
 const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
   const {
@@ -27,6 +30,7 @@ const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
   })
 
   const selectedType = watch("type")
+  const selectedOrigin = watch("origin") // Observamos el origen para validar
 
   // --- CONFIGURACIÓN DE ETIQUETAS DINÁMICAS ---
   const LABELS = {
@@ -79,9 +83,11 @@ const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
 
   const selectClass = `${inputClass} appearance-none cursor-pointer`
   const labelClass =
-    "block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1" // Agregué ml-1 para alinear mejor
+    "block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1"
   const sectionTitleClass =
     "text-lg font-bold text-gray-900 dark:text-white pb-4 border-b border-gray-200 dark:border-neutral-800 mb-6"
+  const arrowIconClass =
+    "absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
 
   return (
     <div className="flex justify-center py-10 px-4 sm:px-6">
@@ -171,38 +177,71 @@ const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
             <section>
               <h2 className={sectionTitleClass}>Ruta del Viaje</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* ORIGEN */}
                 <div>
                   <label className={labelClass}>Origen</label>
                   <div className={inputWrapperClass}>
                     <MapPin size={18} className={inputIconClass} />
-                    <input
-                      {...register("origin", { required: true })}
-                      className={inputClass}
-                      placeholder="Ciudad, País de salida"
-                    />
+                    <select
+                      {...register("origin", {
+                        required: "Seleccione un origen",
+                      })}
+                      className={selectClass}
+                    >
+                      <option value="" disabled>
+                        Seleccione Origen...
+                      </option>
+                      {AVAILABLE_LOCATIONS.map((loc) => (
+                        <option key={loc.value} value={loc.value}>
+                          {loc.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown size={16} className={arrowIconClass} />
                   </div>
                   {errors.origin && (
                     <span className="text-red-500 text-xs mt-1 ml-1">
-                      Campo requerido
+                      {errors.origin.message}
                     </span>
                   )}
                 </div>
 
+                {/* DESTINO (Con validación lógica) */}
                 <div>
                   <label className={labelClass}>Destino</label>
                   <div className={inputWrapperClass}>
                     <Flag size={18} className={inputIconClass} />
-                    <input
-                      {...register("destination", { required: true })}
-                      className={inputClass}
-                      placeholder="Ciudad, País de llegada"
-                    />
+                    <select
+                      {...register("destination", {
+                        required: "Seleccione un destino",
+                        validate: (value) =>
+                          value !== selectedOrigin ||
+                          "El destino no puede ser igual al origen",
+                      })}
+                      className={selectClass}
+                    >
+                      <option value="" disabled>
+                        Seleccione Destino...
+                      </option>
+                      {AVAILABLE_LOCATIONS.map((loc) => (
+                        <option key={loc.value} value={loc.value}>
+                          {loc.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown size={16} className={arrowIconClass} />
                   </div>
+                  {/* Mensaje de error */}
+                  {errors.destination && (
+                    <span className="text-red-500 text-xs mt-1 ml-1">
+                      {errors.destination.message}
+                    </span>
+                  )}
                 </div>
               </div>
             </section>
 
-            {/* 2. DETALLES TÉCNICOS (Con Iconos Unificados) */}
+            {/* 2. DETALLES TÉCNICOS */}
             <section>
               <h2 className={sectionTitleClass}>Detalles Técnicos</h2>
 
@@ -226,11 +265,10 @@ const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
                       </option>
                       <option value="granel">Granel</option>
                       <option value="embalada">Embalada / Pallets</option>
+                      <option value="peligrosa">Carga Peligrosa (IMO)</option>
+                      <option value="maquinaria">Maquinaria</option>
                     </select>
-                    <ChevronDown
-                      size={16}
-                      className="absolute right-4 text-gray-400 pointer-events-none"
-                    />
+                    <ChevronDown size={16} className={arrowIconClass} />
                   </div>
                 </div>
 
@@ -260,10 +298,7 @@ const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
                       <option value="cisterna">Cisterna</option>
                       <option value="plataforma">Plataforma / Cama Baja</option>
                     </select>
-                    <ChevronDown
-                      size={16}
-                      className="absolute right-4 text-gray-400 pointer-events-none"
-                    />
+                    <ChevronDown size={16} className={arrowIconClass} />
                   </div>
                 </div>
               </div>
@@ -338,7 +373,7 @@ const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
                           : "readyDate",
                         { required: true }
                       )}
-                      className={inputClass} // style={{ colorScheme: "dark" }} // Opcional para calendario nativo oscuro
+                      className={inputClass}
                     />
                   </div>
                 </div>
@@ -383,7 +418,7 @@ const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
               </Link>
               <button
                 type="submit"
-                className="px-8 h-12 rounded-lg font-bold bg-[#005A9C] text-white dark:text-black dark:bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-500/20 transition-all active:scale-95"
+                className="px-8 h-12 rounded-lg font-bold bg-[#005A9C] dark:bg-amber-500 text-white dark:text-black hover:brightness-110 shadow-lg shadow-amber-500/20 transition-all active:scale-95"
               >
                 Siguiente Paso
               </button>

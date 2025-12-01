@@ -137,7 +137,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           >
             <LayoutDashboard className={iconClass("/marketplace")} />
             {!collapsedState && (
-              <span className="text-sm whitespace-nowrap">Dashboard</span>
+              <span className="text-sm whitespace-nowrap">Marketplace</span>
             )}
           </Link>
 
