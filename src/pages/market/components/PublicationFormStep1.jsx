@@ -1,7 +1,19 @@
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { ArrowLeft, ChevronDown, Calendar } from "lucide-react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import {
+  ArrowLeft,
+  MapPin,
+  Flag,
+  Package,
+  Truck,
+  Calendar,
+  FileText,
+  ChevronDown,
+  Scale, // Nuevo icono Peso
+  Box, // Nuevo icono Volumen
+  Layers, // Nuevo icono Cantidad
+} from "lucide-react"
+import { Link } from "react-router-dom"
 
 const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
   const {
@@ -12,293 +24,375 @@ const PublicationFormStep1 = ({ initialData, onSubmit, allowedType }) => {
     formState: { errors },
   } = useForm({
     defaultValues: initialData,
-  });
+  })
 
-  const selectedType = watch("type");
+  const selectedType = watch("type")
+
+  // --- CONFIGURACIÓN DE ETIQUETAS DINÁMICAS ---
+  const LABELS = {
+    offer: {
+      title: "Publicar Oferta de Transporte",
+      subtitle: "Complete los datos de su vehículo disponible.",
+      cargoLabel: "Tipo de Carga que Acepta",
+      vehicleLabel: "Su Vehículo",
+      weight: "Capacidad (kg)",
+      volume: "Volumen (m³)",
+      dateLabel: "Disponible Desde",
+    },
+    request: {
+      title: "Publicar Solicitud de Carga",
+      subtitle: "Describa la mercancía que necesita transportar.",
+      cargoLabel: "Tipo de Mercancía",
+      vehicleLabel: "Vehículo Requerido",
+      weight: "Peso Total (kg)",
+      volume: "Volumen Total (m³)",
+      dateLabel: "Fecha de Salida",
+    },
+  }
+
+  const currentLabels = LABELS[selectedType] || LABELS.request
 
   useEffect(() => {
-    if (allowedType) setValue("type", allowedType);
-  }, [allowedType, setValue]);
+    if (allowedType) setValue("type", allowedType)
+  }, [allowedType, setValue])
 
   const onStepSubmit = (data) => {
-    const dateFieldName = data.type === "offer" ? "availableDate" : "readyDate";
-    const dateValue = data[dateFieldName];
-    if (dateValue) data[dateFieldName] = new Date(dateValue).toISOString();
-    onSubmit(data);
-  };
+    const dateFieldName = data.type === "offer" ? "availableDate" : "readyDate"
+    const dateValue = data[dateFieldName]
+    if (dateValue) data[dateFieldName] = new Date(dateValue).toISOString()
+    onSubmit(data)
+  }
 
-  // --- ESTILOS REUTILIZABLES (Basados en Stitch) ---
+  // --- ESTILOS DE UI ---
+  const inputWrapperClass = "relative flex items-center group"
+  const inputIconClass =
+    "absolute left-4 text-gray-400 dark:text-gray-500 pointer-events-none group-focus-within:text-amber-500 transition-colors"
 
-  // Inputs: Altura 14 (56px), fondo oscuro específico #191919, borde sutil #333333
-  const inputStyles = `
-    flex w-full flex-1 resize-none overflow-hidden rounded-lg 
-    h-14 p-[15px] text-base font-normal leading-normal transition-colors duration-200 outline-none
-    
-    text-gray-900 bg-white border border-gray-200 placeholder:text-gray-400
-    focus:border-primary focus:ring-2 focus:ring-primary/20
-    
-    dark:text-white dark:bg-[#191919] dark:border-[#333333] dark:placeholder:text-[#888888]
-  `;
+  const inputClass = `
+    w-full h-12 rounded-lg border text-sm font-medium transition-all outline-none
+    pl-11 pr-4 
+    bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400
+    focus:bg-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500
+    dark:bg-[#111] dark:border-neutral-800 dark:text-white dark:placeholder:text-neutral-600
+    dark:focus:bg-black dark:focus:border-amber-500
+  `
 
-  // Labels: Texto mediano, color gris claro en dark mode
-  const labelStyles = `
-    text-base font-medium leading-normal pb-2
-    text-gray-700 dark:text-[#E0E0E0]
-  `;
-
-  // Select Wrapper (para posicionar la flecha custom)
-  const selectWrapperStyles = "relative w-full";
-  const selectArrowStyles =
-    "absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-[#888888]";
+  const selectClass = `${inputClass} appearance-none cursor-pointer`
+  const labelClass =
+    "block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1" // Agregué ml-1 para alinear mejor
+  const sectionTitleClass =
+    "text-lg font-bold text-gray-900 dark:text-white pb-4 border-b border-gray-200 dark:border-neutral-800 mb-6"
 
   return (
-    <div className="flex flex-col items-center px-4 sm:px-10 md:px-20 py-5 sm:py-10">
-      <div className="w-full max-w-[960px]">
+    <div className="flex justify-center py-10 px-4 sm:px-6">
+      <div className="w-full max-w-4xl">
         {/* HEADER */}
-        <div className="mb-8 gap-3 flex flex-col">
+        <div className="mb-8">
           <Link
             to="/marketplace"
-            className="inline-flex items-center text-gray-500 dark:text-[#888888] hover:text-primary transition-colors mb-2 w-fit"
+            className="inline-flex items-center text-sm text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-500 mb-4 transition-colors"
           >
-            <ArrowLeft size={20} className="mr-2" /> Volver
+            <ArrowLeft size={16} className="mr-1" /> Volver al Dashboard
           </Link>
-          <h1 className="text-4xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white">
-            Crear Nueva Oferta o Demanda
-          </h1>
-          <p className="text-gray-500 dark:text-[#888888] text-base font-normal">
-            Complete los siguientes campos para publicar su requerimiento en la
-            plataforma.
-          </p>
+          <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900 dark:text-white">
+                {currentLabels.title}
+              </h1>
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
+                {currentLabels.subtitle}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4 bg-white dark:bg-[#111] p-3 rounded-xl border border-gray-200 dark:border-neutral-800 shadow-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-[#005A9C] dark:bg-amber-500 text-white dark:text-black flex items-center justify-center font-bold text-xs">
+                  1
+                </div>
+                <span className="text-sm font-bold text-black dark:text-amber-500">
+                  Requisitos
+                </span>
+              </div>
+              <div className="w-8 h-px bg-gray-300 dark:bg-neutral-700"></div>
+              <div className="flex items-center gap-2 opacity-50">
+                <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-neutral-800 text-gray-500 flex items-center justify-center font-bold text-xs">
+                  2
+                </div>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Docs
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit(onStepSubmit)}>
-          {/* 1. SELECTOR DE TIPO (Toggle Pill) */}
-          <div className="flex mb-8">
-            <div
-              className="flex flex-1 h-12 w-full sm:w-auto sm:min-w-[300px] items-center justify-center rounded-lg p-1 border transition-colors
-              bg-gray-100 border-gray-200 
-              dark:bg-[#191919] dark:border-[#333333]"
-            >
-              {["offer", "request"].map((type) => {
-                const isActive = selectedType === type;
-                const isDisabled = allowedType && allowedType !== type;
+        {/* FORM CONTAINER */}
+        <div className="bg-white dark:bg-[#191919] border border-gray-200 dark:border-neutral-800 rounded-2xl p-6 md:p-10 shadow-xl">
+          <form
+            onSubmit={handleSubmit(onStepSubmit)}
+            className="flex flex-col gap-10"
+          >
+            {/* 0. TIPO DE OPERACIÓN */}
+            <div>
+              <h2 className={sectionTitleClass}>Tipo de Operación</h2>
+              <div className="flex p-1 rounded-xl bg-gray-100 dark:bg-[#111] border border-gray-200 dark:border-neutral-800">
+                {["offer", "request"].map((type) => {
+                  const isActive = selectedType === type
+                  if (allowedType && allowedType !== type) return null
 
-                if (isDisabled) return null; // Ocultar si no está permitido por rol
+                  return (
+                    <label
+                      key={type}
+                      className={`
+                            flex-1 cursor-pointer flex items-center justify-center py-3 rounded-lg text-sm font-bold transition-all duration-200
+                            ${
+                              isActive
+                                ? "bg-[#005A9C] dark:bg-amber-500 text-white dark:text-black shadow-sm ring-1 ring-black/5"
+                                : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                            }
+                            `}
+                    >
+                      <input
+                        type="radio"
+                        value={type}
+                        {...register("type")}
+                        className="hidden"
+                      />
+                      {type === "offer"
+                        ? "Ofertar Transporte"
+                        : "Solicitar Carga"}
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
 
-                return (
-                  <label
-                    key={type}
-                    className={`
-                    flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-6 text-sm font-medium leading-normal transition-all duration-200
-                    ${
-                      isActive
-                        ? "dark:bg-amber-500 bg-[#005A9C] text-white dark:text-black shadow-[0_0_4px_rgba(245,159,10,0.3)] font-bold"
-                        : "text-gray-500 dark:text-[#E0E0E0] hover:bg-gray-200 dark:hover:bg-[#333333]"
-                    }
-                  `}
-                  >
-                    <span className="truncate">
-                      {type === "offer" ? "Oferta" : "Demanda"}
-                    </span>
+            {/* 1. RUTA */}
+            <section>
+              <h2 className={sectionTitleClass}>Ruta del Viaje</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelClass}>Origen</label>
+                  <div className={inputWrapperClass}>
+                    <MapPin size={18} className={inputIconClass} />
                     <input
-                      type="radio"
-                      value={type}
-                      {...register("type")}
-                      className="hidden"
+                      {...register("origin", { required: true })}
+                      className={inputClass}
+                      placeholder="Ciudad, País de salida"
                     />
+                  </div>
+                  {errors.origin && (
+                    <span className="text-red-500 text-xs mt-1 ml-1">
+                      Campo requerido
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label className={labelClass}>Destino</label>
+                  <div className={inputWrapperClass}>
+                    <Flag size={18} className={inputIconClass} />
+                    <input
+                      {...register("destination", { required: true })}
+                      className={inputClass}
+                      placeholder="Ciudad, País de llegada"
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 2. DETALLES TÉCNICOS (Con Iconos Unificados) */}
+            <section>
+              <h2 className={sectionTitleClass}>Detalles Técnicos</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className={labelClass}>
+                    {currentLabels.cargoLabel}
                   </label>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 2. SECCIÓN RUTA */}
-          <section className="mb-8">
-            <h3 className="text-lg font-bold leading-tight tracking-[-0.015em] pb-4 text-gray-900 dark:text-white">
-              Sección de Ruta
-            </h3>
-            <div className="flex flex-col md:flex-row gap-4">
-              <label className="flex flex-col flex-1">
-                <p className={labelStyles}>Origen</p>
-                <input
-                  {...register("origin", { required: true })}
-                  className={inputStyles}
-                  placeholder="Ciudad o puerto de origen"
-                />
-                {errors.origin && (
-                  <span className="text-red-500 text-xs mt-1">Requerido</span>
-                )}
-              </label>
-              <label className="flex flex-col flex-1">
-                <p className={labelStyles}>Destino</p>
-                <input
-                  {...register("destination", { required: true })}
-                  className={inputStyles}
-                  placeholder="Ciudad o puerto de destino"
-                />
-              </label>
-            </div>
-          </section>
-
-          {/* 3. SECCIÓN CARGA / VEHÍCULO */}
-          <section className="mb-8">
-            <h3 className="text-lg font-bold leading-tight tracking-[-0.015em] pb-4 text-gray-900 dark:text-white">
-              Sección de Carga/Vehículo
-            </h3>
-
-            {/* Fila 1: Tipo de Carga y Vehículo */}
-            <div className="flex flex-col md:flex-row gap-4 mb-4">
-              <label className="flex flex-col flex-1">
-                <p className={labelStyles}>Tipo de Mercancía</p>
-                <div className={selectWrapperStyles}>
-                  <select
-                    {...register("cargoType", { required: true })}
-                    className={`${inputStyles} appearance-none cursor-pointer`}
-                  >
-                    <option value="" disabled>
-                      Seleccione un tipo
-                    </option>
-                    <option value="carga general">Carga General</option>
-                    <option value="perecederos">Perecederos</option>
-                    <option value="granel">Granel</option>
-                    <option value="embalada">Embalada</option>
-                  </select>
-                  <ChevronDown size={20} className={selectArrowStyles} />
+                  <div className={inputWrapperClass}>
+                    <Package size={18} className={inputIconClass} />
+                    <select
+                      {...register("cargoType", { required: true })}
+                      className={selectClass}
+                    >
+                      <option value="" disabled>
+                        Seleccionar...
+                      </option>
+                      <option value="carga general">Carga General</option>
+                      <option value="perecederos">
+                        Perecederos (Refrigerada)
+                      </option>
+                      <option value="granel">Granel</option>
+                      <option value="embalada">Embalada / Pallets</option>
+                    </select>
+                    <ChevronDown
+                      size={16}
+                      className="absolute right-4 text-gray-400 pointer-events-none"
+                    />
+                  </div>
                 </div>
-              </label>
 
-              <label className="flex flex-col flex-1">
-                <p className={labelStyles}>
-                  {selectedType === "offer"
-                    ? "Vehículo Ofrecido"
-                    : "Vehículo Requerido"}
-                </p>
-                <div className={selectWrapperStyles}>
-                  <select
-                    {...register(
-                      selectedType === "offer"
-                        ? "vehicleType"
-                        : "requiredVehicleType",
-                      { required: true }
-                    )}
-                    className={`${inputStyles} appearance-none cursor-pointer`}
-                  >
-                    <option value="" disabled>
-                      Seleccione un tipo
-                    </option>
-                    <option value="semiremolque">Semiremolque</option>
-                    <option value="camion_rigido">Camión Rígido</option>
-                    <option value="frigorifico">Frigorífico</option>
-                    <option value="cisterna">Cisterna</option>
-                    <option value="plataforma">Plataforma</option>
-                  </select>
-                  <ChevronDown size={20} className={selectArrowStyles} />
+                <div>
+                  <label className={labelClass}>
+                    {currentLabels.vehicleLabel}
+                  </label>
+                  <div className={inputWrapperClass}>
+                    <Truck size={18} className={inputIconClass} />
+                    <select
+                      {...register(
+                        selectedType === "offer"
+                          ? "vehicleType"
+                          : "requiredVehicleType",
+                        { required: true }
+                      )}
+                      className={selectClass}
+                    >
+                      <option value="" disabled>
+                        Seleccionar...
+                      </option>
+                      <option value="semiremolque">
+                        Semiremolque / Trailer
+                      </option>
+                      <option value="camion_rigido">Camión Rígido</option>
+                      <option value="frigorifico">Frigorífico</option>
+                      <option value="cisterna">Cisterna</option>
+                      <option value="plataforma">Plataforma / Cama Baja</option>
+                    </select>
+                    <ChevronDown
+                      size={16}
+                      className="absolute right-4 text-gray-400 pointer-events-none"
+                    />
+                  </div>
                 </div>
-              </label>
-            </div>
+              </div>
 
-            {/* Fila 2: Peso y Volumen */}
-            <div className="flex flex-col md:flex-row gap-4 mb-4">
-              <label className="flex flex-col flex-1">
-                <p className={labelStyles}>Peso (kg)</p>
-                <input
-                  type="number"
-                  {...register("weightKg", {
-                    required: true,
-                    valueAsNumber: true,
-                  })}
-                  className={inputStyles}
-                  placeholder="e.g., 20000"
-                />
-              </label>
-              <label className="flex flex-col flex-1">
-                <p className={labelStyles}>Volumen (m³)</p>
-                <input
-                  type="number"
-                  {...register("volumeM3", { valueAsNumber: true })}
-                  className={inputStyles}
-                  placeholder="e.g., 33"
-                />
-              </label>
-              <label className="flex flex-col flex-1">
-                <p className={labelStyles}>Cantidad Vehículos</p>
-                <input
-                  type="number"
-                  defaultValue={1}
-                  {...register("numberOfVehicles", {
-                    required: true,
-                    valueAsNumber: true,
-                    min: 1,
-                  })}
-                  className={inputStyles}
-                />
-              </label>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* PESO */}
+                <div>
+                  <label className={labelClass}>{currentLabels.weight}</label>
+                  <div className={inputWrapperClass}>
+                    <Scale size={18} className={inputIconClass} />
+                    <input
+                      type="number"
+                      {...register("weightKg", {
+                        required: true,
+                        valueAsNumber: true,
+                      })}
+                      className={inputClass}
+                      placeholder="Ej: 25000"
+                    />
+                  </div>
+                </div>
 
-            {/* Fila 3: Textarea */}
-            <label className="flex flex-col w-full">
-              <p className={labelStyles}>Detalles Adicionales (Opcional)</p>
-              <textarea
-                {...register("notes")}
-                className={`${inputStyles} h-32 resize-y py-3`}
-                placeholder="Instrucciones especiales, dimensiones, tipo de embalaje, etc."
-              ></textarea>
-            </label>
-          </section>
+                {/* VOLUMEN */}
+                <div>
+                  <label className={labelClass}>{currentLabels.volume}</label>
+                  <div className={inputWrapperClass}>
+                    <Box size={18} className={inputIconClass} />
+                    <input
+                      type="number"
+                      {...register("volumeM3", { valueAsNumber: true })}
+                      className={inputClass}
+                      placeholder="Ej: 80"
+                    />
+                  </div>
+                </div>
 
-          {/* 4. SECCIÓN FECHAS */}
-          <section className="mb-8">
-            <h3 className="text-lg font-bold leading-tight tracking-[-0.015em] pb-4 text-gray-900 dark:text-white">
-              Sección de Fechas y Disponibilidad
-            </h3>
-            <div className="flex flex-col md:flex-row gap-4">
-              <label className="flex flex-col flex-1">
-                <p className={labelStyles}>
-                  {selectedType === "offer"
-                    ? "Fecha de Disponibilidad"
-                    : "Carga Lista Desde"}
-                </p>
-                <div className={selectWrapperStyles}>
-                  <input
-                    type="datetime-local"
-                    {...register(
-                      selectedType === "offer" ? "availableDate" : "readyDate",
-                      { required: true }
-                    )}
-                    className={`${inputStyles} pr-10`}
-                    // El input date nativo tiene su propio icono, pero podemos forzar el estilo oscuro con CSS global si es necesario
+                {/* CANTIDAD */}
+                <div>
+                  <label className={labelClass}>Cantidad</label>
+                  <div className={inputWrapperClass}>
+                    <Layers size={18} className={inputIconClass} />
+                    <input
+                      type="number"
+                      defaultValue={1}
+                      {...register("numberOfVehicles", {
+                        required: true,
+                        valueAsNumber: true,
+                        min: 1,
+                      })}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 3. PROGRAMACIÓN */}
+            <section>
+              <h2 className={sectionTitleClass}>Programación</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelClass}>
+                    {currentLabels.dateLabel}
+                  </label>
+                  <div className={inputWrapperClass}>
+                    <Calendar size={18} className={inputIconClass} />
+                    <input
+                      type="datetime-local"
+                      {...register(
+                        selectedType === "offer"
+                          ? "availableDate"
+                          : "readyDate",
+                        { required: true }
+                      )}
+                      className={inputClass} // style={{ colorScheme: "dark" }} // Opcional para calendario nativo oscuro
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 4. INFORMACIÓN ADICIONAL */}
+            <section>
+              <h2 className={sectionTitleClass}>Información Adicional</h2>
+              <div>
+                <label className={labelClass}>Instrucciones Especiales</label>
+                <div className="relative">
+                  <FileText
+                    size={18}
+                    className="absolute left-4 top-4 text-gray-400 dark:text-gray-500 pointer-events-none"
                   />
-                  <Calendar size={20} className={selectArrowStyles} />
+                  <textarea
+                    {...register("notes")}
+                    className={`
+                            w-full min-h-[120px] rounded-lg border text-sm font-medium transition-all outline-none
+                            pl-11 pr-4 py-3 resize-y
+                            bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400
+                            focus:bg-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500
+                            dark:bg-[#111] dark:border-neutral-800 dark:text-white dark:placeholder:text-neutral-600
+                            dark:focus:bg-black dark:focus:border-amber-500
+                        `}
+                    placeholder="Añada cualquier nota relevante, requisitos de manipulación o preguntas..."
+                  ></textarea>
                 </div>
-              </label>
-            </div>
-          </section>
+              </div>
+            </section>
 
-          {/* FOOTER ACTIONS */}
-          <div className="flex items-center justify-end gap-4 py-4 mt-4 border-t border-gray-200 dark:border-[#333333]">
-            <Link to="/marketplace">
+            {/* FOOTER */}
+            <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200 dark:border-neutral-800">
+              <Link to="/marketplace">
+                <button
+                  type="button"
+                  className="px-6 h-12 rounded-lg font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
+                >
+                  Cancelar
+                </button>
+              </Link>
               <button
-                type="button"
-                className="flex items-center justify-center font-bold h-12 px-6 rounded-lg transition-colors duration-200 text-gray-700 bg-transparent border border-gray-300 hover:bg-gray-100 dark:text-[#E0E0E0] dark:border-[#333333] dark:hover:bg-[#191919]"
+                type="submit"
+                className="px-8 h-12 rounded-lg font-bold bg-[#005A9C] text-white dark:text-black dark:bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-500/20 transition-all active:scale-95"
               >
-                Cancelar
+                Siguiente Paso
               </button>
-            </Link>
-
-            {/* CAMBIO: Texto explícito de 'Continuar' */}
-            <button
-              type="submit"
-              className="flex items-center justify-center gap-2 font-bold bg-[#005A9C] dark:bg-amber-500 text-white dark:text-black bg-primary h-12 px-8 rounded-lg hover:brightness-110 transition-all duration-200 shadow-lg"
-            >
-              <span>Continuar a Documentación</span>
-              <ArrowLeft className="rotate-180" size={20} />{" "}
-              {/* Flecha derecha */}
-            </button>
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PublicationFormStep1;
+export default PublicationFormStep1
